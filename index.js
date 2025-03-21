@@ -2,6 +2,7 @@ const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
 const bodyParser = require('body-parser')
+const userRoutes = require('./routes/userRoutes');
 
 const sequelize = require('./config/database');
 
@@ -13,6 +14,8 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cors());
 
+
+app.use('/api', userRoutes);
 
 app.get('/', (req, res) => {
     res.send('Hola, mundo!');
