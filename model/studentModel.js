@@ -28,6 +28,22 @@ const Student = sequelize.define('Student', {
         type: DataTypes.ENUM('active', 'inactive'),
         allowNull: false,
         defaultValue: 'active'
+    },
+    id_legal_representative: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'legal_representatives',
+            key: 'id_representative'
+        }
+    },
+    id_course: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'courses',
+            key: 'id_course'
+        }
     }
 }, {
     tableName: 'students',
