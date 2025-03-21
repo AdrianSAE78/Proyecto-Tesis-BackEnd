@@ -5,6 +5,10 @@ const bodyParser = require('body-parser')
 
 const sequelize = require('./config/database');
 
+const incidentsRoute = require('./routes/incidentsRoute');
+const legalRepresentativeRoute = require('./routes/legalRepresentativeRoute');
+const professorRoute = require('./routes/professorRoute');
+
 const app = express();
 
 const PORT = 3000;
@@ -14,9 +18,9 @@ app.use(bodyParser.json());
 app.use(cors());
 
 
-app.get('/', (req, res) => {
-    res.send('Hola, mundo!');
-});
+app.use('/api', professorRoute);
+app.use('/api', legalRepresentativeRoute);
+app.use('/api', incidentsRoute)
 
 // Iniciar el servidor
 sequelize.sync().then(() => {
