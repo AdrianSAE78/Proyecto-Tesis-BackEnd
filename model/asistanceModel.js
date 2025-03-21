@@ -7,28 +7,28 @@ let Asistance = sequelize.define('Asistance', {
         primaryKey: true,
         autoIncrement: true
     },
-    // id_student: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: false,
-    //     references: {
-    //         model: 'Student',
-    //         key: 'id_student'
-    //     }
-    // },
-    // id_professor: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: false,
-    //     references: {
-    //         model: 'Professor',
-    //         key: 'id_professor'
-    //     }
-    // },
+    id_student: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'students',
+            key: 'id_student'
+        }
+    },
+    id_professor: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'professors',
+            key: 'id_professor'
+        }
+    },
     date: {
         type: DataTypes.DATE,
         allowNull: false
     },
     status: {
-        type: DataTypes.ENUM('presente', 'ausente'),
+        type: DataTypes.ENUM('present', 'ausent'),
         allowNull: false
     },
     justification: {
