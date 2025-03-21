@@ -1,7 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const Course = require('./courseModel');
-const Representative = require('./representativeModel');
 
 const Student = sequelize.define('Student', {
     id_student: {
@@ -35,9 +33,5 @@ const Student = sequelize.define('Student', {
     tableName: 'students',
     timestamps: false
 });
-
-// Definimos las relaciones con otras entidades
-Student.belongsTo(Course, { foreignKey: 'id_course' });
-Student.belongsTo(Representative, { foreignKey: 'id_representative' });
 
 module.exports = Student;

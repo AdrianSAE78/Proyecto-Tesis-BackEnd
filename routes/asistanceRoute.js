@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const asistanceController = require('../controler/asistanceController');
+const asistanceController = require('../controller/asistanceController');
 
 router.get('/', asistanceController.getAllAsistances);
 router.get('/:id', asistanceController.getAsistanceById);

@@ -17,33 +17,33 @@ let User = sequelize.define('User', {
         allowNull: false
     },
     rol: {
-        type: DataTypes.ENUM('administrador', 'profesor', 'representante'),
+        type: DataTypes.ENUM('administrative', 'professor', 'legalRepresentative'),
         allowNull: false
     },
-    // id_administrative: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: true,
-    //     references: {
-    //         model: 'Administrative', 
-    //         key: 'id_administrative'
-    //     }
-    // },
-    // id_professor: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: true,
-    //     references: {
-    //         model: 'Professor', 
-    //         key: 'id_professor'
-    //     }
-    // },
-    // id_legal_representative: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: true,
-    //     references: {
-    //         model: 'LegalRepresentative', 
-    //         key: 'id_legal_representative'
-    //     }
-    // }
+    id_administrative: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'administratives', 
+            key: 'id_administrative'
+        }
+    },
+    id_professor: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'professors', 
+            key: 'id_professor'
+        }
+    },
+    id_representative: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: 'legal_representatives', 
+            key: 'id_representative'
+        }
+    }
 }, {
     tableName: 'User',
     timestamps: false 

@@ -1,4 +1,4 @@
-const LegalRepresentative = require('../model/legalRepresentative');
+const LegalRepresentative = require('../model/legalRepresentativeModel');
 
 exports.getAllLegalRepresentatives = async (req, res) => {
     try {
