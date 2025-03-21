@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database'); 
 
-let Asistance = sequelize.define('Asistance', {
+const Asistance = sequelize.define('Asistance', {
     id_asistance: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -41,7 +41,7 @@ let Asistance = sequelize.define('Asistance', {
         allowNull: true
     },
 }, {
-    tableName: 'Asistance',
+    tableName: 'asistance',
     timestamps: false 
 });
 
