@@ -14,7 +14,8 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cors());
 
-app.use('/users', userRoutes);
+
+app.use('/api', userRoutes);
 
 app.get('/', (req, res) => {
     res.send('Hola, mundo!');

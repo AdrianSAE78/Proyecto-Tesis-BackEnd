@@ -1,8 +1,32 @@
 const User = require('../model/userModel'); 
+// const tableRelations = require('../model/tableRelations');
 
-const createUser = async (req, res) => {
+exports.getAllUsers = async (req, res) => {
     try {
-        const { user_name, password, rol, id_administrative, id_professor, id_legal_representative } = req.body;
+        let users = await User.findAll();
+        res.status(200).json(users);
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener usuarios", error: error.message });
+    }
+};
+
+exports.getUserById = async (req, res) => {
+    try {
+        let { id } = req.params;
+        let user = await User.findByPk(id);
+        if (!user) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        res.status(200).json(user);
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener usuario", error: error.message });
+    }
+};
+
+exports.createUser = async (req, res) => {
+    try {
+        let { user_name, password, rol, id_administrative, id_professor, id_legal_representative } = req.body;
 
         if ((rol === 'administrador' && !id_administrative) ||
             (rol === 'profesor' && !id_professor) ||
@@ -10,7 +34,7 @@ const createUser = async (req, res) => {
             return res.status(400).json({ message: "Debe proporcionar un ID válido según el rol seleccionado." });
         }
 
-        const newUser = await User.create({
+        let newUser = await User.create({
             user_name,
             password,
             rol,
@@ -25,36 +49,12 @@ const createUser = async (req, res) => {
     }
 };
 
-const getAllUsers = async (req, res) => {
+exports.updateUser = async (req, res) => {
     try {
-        const users = await User.findAll();
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener usuarios", error: error.message });
-    }
-};
+        let { id } = req.params;
+        let { user_name, password, rol, id_administrative, id_professor, id_legal_representative } = req.body;
 
-const getUserById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const user = await User.findByPk(id);
-
-        if (!user) {
-            return res.status(404).json({ message: "Usuario no encontrado" });
-        }
-
-        res.status(200).json(user);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener usuario", error: error.message });
-    }
-};
-
-const updateUser = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { user_name, password, rol, id_administrative, id_professor, id_legal_representative } = req.body;
-
-        const user = await User.findByPk(id);
+        let user = await User.findByPk(id);
         if (!user) {
             return res.status(404).json({ message: "Usuario no encontrado" });
         }
@@ -74,10 +74,10 @@ const updateUser = async (req, res) => {
     }
 };
 
-const deleteUser = async (req, res) => {
+exports.deleteUser = async (req, res) => {
     try {
-        const { id } = req.params;
-        const user = await User.findByPk(id);
+        let { id } = req.params;
+        let user = await User.findByPk(id);
 
         if (!user) {
             return res.status(404).json({ message: "Usuario no encontrado" });
@@ -88,12 +88,4 @@ const deleteUser = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Error al eliminar usuario", error: error.message });
     }
-};
-
-module.exports = {
-    createUser,
-    getAllUsers,
-    getUserById,
-    updateUser,
-    deleteUser
 };
