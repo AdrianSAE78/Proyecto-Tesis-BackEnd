@@ -24,10 +24,6 @@ const Administrative = sequelize.define('Administrative', {
     phone: {
         type: DataTypes.STRING,
         allowNull: true
-    },
-    role: {
-        type: DataTypes.ENUM('administrator', 'professor', 'student', 'parent'),
-        allowNull: false
     }
 }, {
     tableName: 'administratives',

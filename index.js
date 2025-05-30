@@ -12,6 +12,8 @@ const asistanceRoutes = require('./routes/asistanceRoute');
 const incidentsRoute = require('./routes/incidentsRoute');
 const legalRepresentativeRoute = require('./routes/legalRepresentativeRoute');
 const professorRoute = require('./routes/professorRoute');
+const roleRoute = require('./routes/roleRoute');
+const authRoute = require('./routes/authRoute');
 
 const app = express();
 const PORT = 3000;
@@ -30,6 +32,8 @@ app.use('/api', userRoutes);
 app.use('/api', professorRoute);
 app.use('/api', legalRepresentativeRoute);
 app.use('/api', incidentsRoute)
+app.use('/api', roleRoute);
+app.use('/api/auth', authRoute);
 
 // Iniciar el servidor
 sequelize.sync().then(() => {
