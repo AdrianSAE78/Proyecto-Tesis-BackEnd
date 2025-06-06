@@ -60,4 +60,4 @@ const ProfessorCourse = sequelize.define('ProfessorCourse', {
     timestamps: false
   });
   
-  module.exports = ProfessorCourse;
+  module.exports = Professor;

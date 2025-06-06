@@ -26,7 +26,7 @@ exports.getAdministrativeById = async (req, res) => {
 exports.createAdministrative = async (req, res) => {
     try {
         const { firstName, lastName, email, phone, role } = req.body;
-        let newAdministrative = await Administrative.create({ firstName, lastName, email, phone, role });
+        let newAdministrative = await Administrative.create({ firstName, lastName, email, phone });
         res.status(201).json(newAdministrative);
     } catch (error) {
         console.error(error);
