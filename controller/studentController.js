@@ -23,6 +23,25 @@ exports.getStudentById = async (req, res) => {
     }
 };
 
+exports.getStudentsByCourseId = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const students = await Student.findAll({
+            where: { id_course: courseId }
+        });
+
+        if (!students || students.length === 0) {
+            return res.status(404).json({ message: "No students found for this course." });
+        }
+
+        res.status(200).json(students);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
 exports.createStudent = async (req, res) => {
     try {
         const { firstName, lastName, birthDate, identityCard, status, id_course, id_representative } = req.body;
