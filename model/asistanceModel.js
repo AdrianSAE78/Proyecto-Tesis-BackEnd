@@ -23,12 +23,15 @@ const Asistance = sequelize.define('Asistance', {
             key: 'id_professor'
         }
     },
-    date: {
+
+    date: { 
         type: DataTypes.DATE,
-        allowNull: false
+        allowNull: false,
+        defaultValue: DataTypes.NOW
     },
+    
     status: {
-        type: DataTypes.ENUM('present', 'ausent'),
+        type: DataTypes.ENUM('present', 'absent', 'late'),
         allowNull: false
     },
     justification: {

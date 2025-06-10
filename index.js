@@ -27,7 +27,7 @@ app.use(cors());
 app.use('/api', studentRoute);
 app.use('/api', administrativeRoute);
 app.use('/api', courseRoute);
-app.use('/api', asistanceRoutes);
+app.use('/api/asistances', asistanceRoutes);
 app.use('/api', userRoutes);
 app.use('/api', professorRoute);
 app.use('/api', legalRepresentativeRoute);

@@ -24,14 +24,18 @@ exports.getIncidentById = async (req, res) => {
 };
 
 exports.createIncident = async (req, res) => {
-    try {
-        const { studentId, professorId, type, description, date, status } = req.body;
-        let newIncident = await Incident.create({ studentId, professorId, type, description, date, status });
-        res.status(201).json(newIncident);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+  try {
+    const { type, description, id_student, id_professor } = req.body;
+
+    if (!id_student || !id_professor) {
+      return res.status(400).json({ error: "Id necesario" });
     }
+    const newIncident = await Incident.create({type, description, id_student, id_professor,});
+    res.status(201).json(newIncident);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 exports.updateIncident = async (req, res) => {
