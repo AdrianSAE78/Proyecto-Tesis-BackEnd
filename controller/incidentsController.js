@@ -1,4 +1,5 @@
 const Incident = require('../model/incidentsModel');
+const Student = require('../model/studentModel')
 
 exports.getAllIncidents = async (req, res) => {
     try {
@@ -61,6 +62,37 @@ exports.deleteIncident = async (req, res) => {
         }
         await incident.destroy();
         res.status(200).json({ message: 'Incidente eliminado correctamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
+    }
+};
+
+exports.getStudentsInFollowUp = async (req, res) => {
+    try {
+        const incidents = await Incident.findAll({
+            include: [
+                {
+                    model: Student,
+                    as: 'student',
+                    attributes: ['id_student', 'lastName', 'firstName']
+                }
+            ]
+        });
+
+        const students = incidents.map(inc => inc.student);
+
+        const uniqueStudents = [];
+        const seen = new Set();
+
+        students.forEach(student => {
+            if (student && !seen.has(student.id_student)) {
+                seen.add(student.id_student);
+                uniqueStudents.push(student);
+            }
+        });
+
+        res.status(200).json(uniqueStudents);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
