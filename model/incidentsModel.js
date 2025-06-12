@@ -26,6 +26,11 @@ const Incident = sequelize.define('Incident', {
         allowNull: false,
         defaultValue: 'pending'
     },
+    resolution:{
+        type:DataTypes.TEXT,
+        allowNull:true,
+        defaultValue:null
+    },
     id_student: {
         type: DataTypes.INTEGER,
         allowNull: false,

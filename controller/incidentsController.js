@@ -47,12 +47,12 @@ exports.getIncidentByStudentId = async (req, res) => {
 
 exports.createIncident = async (req, res) => {
   try {
-    let { type, description, id_student, id_professor } = req.body;
+    let { type, description, resolution, id_student, id_professor } = req.body;
 
     if (!id_student || !id_professor) {
       return res.status(400).json({ error: "Id necesario" });
     }
-    let newIncident = await Incident.create({type, description, id_student, id_professor,});
+    let newIncident = await Incident.create({type, description, resolution:null, id_student, id_professor,});
     res.status(201).json(newIncident);
   } catch (error) {
     console.error(error);
@@ -66,8 +66,8 @@ exports.updateIncident = async (req, res) => {
         if (!incident) {
             return res.status(404).json({ error: 'Incidente no encontrado' });
         }
-        let { studentId, professorId, type, description, date, status } = req.body;
-        await incident.update({ studentId, professorId, type, description, date, status });
+        let { studentId, professorId, type, description,resolution, date, status } = req.body;
+        await incident.update({ studentId, professorId, type, description, resolution, date, status });
         res.status(200).json(incident);
     } catch (error) {
         console.error(error);
@@ -92,6 +92,7 @@ exports.deleteIncident = async (req, res) => {
 exports.getStudentsInFollowUp = async (req, res) => {
     try {
         let incidents = await Incident.findAll({
+            where: { status: 'pending' },
             include: [
                 {
                     model: Student,
