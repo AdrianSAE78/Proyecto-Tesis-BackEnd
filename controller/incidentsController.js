@@ -24,14 +24,35 @@ exports.getIncidentById = async (req, res) => {
     }
 };
 
+exports.getIncidentByStudentId = async (req, res) => {
+  try {
+    let { id_student } = req.params;
+
+    let incidents = await Incident.findAll({
+      where: { id_student }
+    });
+
+    if (!incidents || incidents.length === 0) {
+      return res.status(404).json({ message: 'No se encontraron incidentes para este estudiante' });
+    }
+
+    res.status(200).json(incidents);
+  } catch (error) {
+    console.error("Error al obtener incidentes por estudiante:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
 exports.createIncident = async (req, res) => {
   try {
-    const { type, description, id_student, id_professor } = req.body;
+    let { type, description, id_student, id_professor } = req.body;
 
     if (!id_student || !id_professor) {
       return res.status(400).json({ error: "Id necesario" });
     }
-    const newIncident = await Incident.create({type, description, id_student, id_professor,});
+    let newIncident = await Incident.create({type, description, id_student, id_professor,});
     res.status(201).json(newIncident);
   } catch (error) {
     console.error(error);
@@ -45,7 +66,7 @@ exports.updateIncident = async (req, res) => {
         if (!incident) {
             return res.status(404).json({ error: 'Incidente no encontrado' });
         }
-        const { studentId, professorId, type, description, date, status } = req.body;
+        let { studentId, professorId, type, description, date, status } = req.body;
         await incident.update({ studentId, professorId, type, description, date, status });
         res.status(200).json(incident);
     } catch (error) {
@@ -70,7 +91,7 @@ exports.deleteIncident = async (req, res) => {
 
 exports.getStudentsInFollowUp = async (req, res) => {
     try {
-        const incidents = await Incident.findAll({
+        let incidents = await Incident.findAll({
             include: [
                 {
                     model: Student,
@@ -80,10 +101,10 @@ exports.getStudentsInFollowUp = async (req, res) => {
             ]
         });
 
-        const students = incidents.map(inc => inc.student);
+        let students = incidents.map(inc => inc.student);
 
-        const uniqueStudents = [];
-        const seen = new Set();
+        let uniqueStudents = [];
+        let seen = new Set();
 
         students.forEach(student => {
             if (student && !seen.has(student.id_student)) {

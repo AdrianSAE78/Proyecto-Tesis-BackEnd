@@ -3,6 +3,7 @@ const router = express.Router();
 
 const incidentController = require('../controller/incidentsController');
 
+router.get('/students/:id_student', incidentController.getIncidentByStudentId);
 router.get('/students-follow', incidentController.getStudentsInFollowUp);
 router.get('/', incidentController.getAllIncidents);
 router.get('/:id', incidentController.getIncidentById);
