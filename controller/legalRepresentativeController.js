@@ -2,13 +2,20 @@ const LegalRepresentative = require('../model/legalRepresentativeModel');
 
 exports.getAllLegalRepresentatives = async (req, res) => {
     try {
-        let representatives = await LegalRepresentative.findAll();
-        res.status(200).json(representatives);
+      const reps = await LegalRepresentative.findAll();
+      console.log('✅ Representantes encontrados:', reps); // Debug
+      res.status(200).json(reps);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+      console.error('❌ ERROR EN GET ALL REPRESENTATIVES:', error); // Debug fuerte
+      res.status(500).json({
+        message: 'Error al obtener representantes',
+        error: error.message,
+        stack: error.stack,
+      });
     }
-};
+  };
+  
+
 
 exports.getLegalRepresentativeById = async (req, res) => {
     try {
@@ -25,6 +32,7 @@ exports.getLegalRepresentativeById = async (req, res) => {
 
 exports.createLegalRepresentative = async (req, res) => {
     try {
+        console.log('📥 Datos recibidos para representante legal:', req.body); 
         const { firstName, lastName, identification, phone, email, address } = req.body;
         let newRepresentative = await LegalRepresentative.create({ firstName, lastName, identification, phone, email, address });
         res.status(201).json(newRepresentative);

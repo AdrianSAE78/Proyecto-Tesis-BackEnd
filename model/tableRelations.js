@@ -10,8 +10,10 @@ const Student = require('./studentModel');
 const User = require('./userModel');
 const ProfessorCourse = require('./professorModel');
 
-LegalRepresentative.hasMany(Student, { foreignKey: 'id_representative' });
-Student.belongsTo(LegalRepresentative, { foreignKey: 'id_representative' });
+// 🔧 CORRIGE ESTO:
+LegalRepresentative.hasMany(Student, { foreignKey: 'id_legal_representative' });
+Student.belongsTo(LegalRepresentative, { foreignKey: 'id_legal_representative' });
+
 
 Course.hasMany(Student, { foreignKey: 'id_course' });
 Student.belongsTo(Course, { foreignKey: 'id_course' });

@@ -4,6 +4,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const sequelize = require('./config/database');
 
+// Importación de rutas
 const studentRoute = require('./routes/studentRoute');
 const administrativeRoute = require('./routes/administrativeRoute');
 const courseRoute = require('./routes/courseRoute');
@@ -23,22 +24,25 @@ app.use(morgan('dev'));
 app.use(bodyParser.json());
 app.use(cors());
 
-// Rutas
+// Montaje de rutas (sin cambios)
 app.use('/api', studentRoute);
 app.use('/api', administrativeRoute);
 app.use('/api', courseRoute);
 app.use('/api', asistanceRoutes);
 app.use('/api', userRoutes);
 app.use('/api', professorRoute);
-app.use('/api', legalRepresentativeRoute);
-app.use('/api', incidentsRoute)
+app.use('/api', incidentsRoute);
 app.use('/api', roleRoute);
 app.use('/api/auth', authRoute);
 
-// Iniciar el servidor
+// ✅ Ruta de representantes legales corregida
+app.use('/api/legal-representatives', legalRepresentativeRoute);
+
+
+// Conexión a base de datos y arranque del servidor
 sequelize.sync().then(() => {
-    console.log('Base de datos conectada!');
-    app.listen(PORT, () => {
-        console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
-    });
+  console.log('Base de datos conectada!');
+  app.listen(PORT, () => {
+    console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
+  });
 }).catch(error => console.error('Error conectando la base de datos:', error));
