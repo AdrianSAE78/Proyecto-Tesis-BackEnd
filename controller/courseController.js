@@ -23,6 +23,20 @@ exports.getCourseById = async (req, res) => {
     }
 };
 
+exports.getCoursesByProfessor = async (req, res) => {
+  try {
+    const { professorId } = req.params;
+
+    const courses = await Course.findAll({
+      where: { id_professor: professorId }
+    });
+
+    res.status(200).json(courses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener cursos del profesor', error: error.message });
+  }
+};
+
 exports.createCourse = async (req, res) => {
     try {
         const { courseName, level, description } = req.body;

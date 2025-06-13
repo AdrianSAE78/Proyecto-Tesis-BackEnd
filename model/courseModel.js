@@ -15,6 +15,10 @@ const Course = sequelize.define('Course', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    id_professor: { 
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
     description: {
         type: DataTypes.TEXT,
         allowNull: true
