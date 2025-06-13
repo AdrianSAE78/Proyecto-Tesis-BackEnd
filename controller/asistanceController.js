@@ -2,6 +2,7 @@ const Asistance = require('../model/asistanceModel');
 const Student = require('../model/studentModel');
 
 
+
 exports.getAllAsistances = async (req, res) => {
     try {
         const asistances = await Asistance.findAll();
@@ -24,6 +25,25 @@ exports.getAsistanceById = async (req, res) => {
     } catch (error) {
         res.status(500).json({ message: "Error al obtener asistencia", error: error.message });
     }
+};
+
+exports.getInasistenciasByCourse = async (req, res) => {
+  try {
+    const { id_course } = req.params;
+    const { status } = req.query;
+
+    const asistances = await Asistance.findAll({
+      where: { id_course, status },
+      include: [
+        { model: Student, attributes: ['firstName', 'lastName'] }
+      ]
+    });
+
+    res.status(200).json(asistances);
+  } catch (error) {
+    console.error("Error al obtener asistencias", error);
+    res.status(500).json({ message: "Error al obtener asistencias", error: error.message });
+  }
 };
 
 exports.createAsistance = async (req, res) => {
@@ -129,4 +149,29 @@ exports.getAsistancesByCourseAndStatus = async (req, res) => {
             error: error.message
         });
     }
+};
+
+
+exports.getInasistenciasByProfessorCourse = async (req, res) => {
+  try {
+    const { id_professor, id_course } = req.params;
+
+    const asistencias = await Asistance.findAll({
+      where: {
+        id_professor: id_professor,
+        id_course: id_course,
+        status: 'absent'
+      },
+      include: [{
+        model: Student,
+        foreignKey: 'id_student'
+      }],
+      order: [['date', 'DESC']]
+    });
+
+    res.status(200).json(asistencias);
+  } catch (error) {
+    console.error("Error al obtener inasistencias: ", error);
+    res.status(500).json({ message: "Error al obtener inasistencias", error: error.message });
+  }
 };

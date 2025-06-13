@@ -32,7 +32,7 @@ app.use('/api/asistances', asistanceRoutes);
 app.use('/api', userRoutes);
 app.use('/api', professorRoute);
 app.use('/api/legal-representatives', legalRepresentativeRoute);
-app.use('/api', incidentsRoute)
+app.use('/api/incidents', incidentsRoute)
 app.use('/api', roleRoute);
 app.use('/api/auth', authRoute);
 
