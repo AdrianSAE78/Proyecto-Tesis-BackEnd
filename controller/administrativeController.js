@@ -25,8 +25,8 @@ exports.getAdministrativeById = async (req, res) => {
 
 exports.createAdministrative = async (req, res) => {
     try {
-        const { firstName, lastName, email, phone, role } = req.body;
-        let newAdministrative = await Administrative.create({ firstName, lastName, email, phone });
+        const { firstName, lastName, identification, email, phone, role } = req.body;
+        let newAdministrative = await Administrative.create({ firstName, lastName, identification, email, phone });
         res.status(201).json(newAdministrative);
     } catch (error) {
         console.error(error);
@@ -40,8 +40,8 @@ exports.updateAdministrative = async (req, res) => {
         if (!administrative) {
             return res.status(404).json({ error: 'Administrative not found' });
         }
-        const { firstName, lastName, email, phone, role } = req.body;
-        await administrative.update({ firstName, lastName, email, phone, role });
+        const { firstName, lastName, identification, email, phone, role } = req.body;
+        await administrative.update({ firstName, lastName, identification, email, phone, role });
         res.status(200).json(administrative);
     } catch (error) {
         console.error(error);

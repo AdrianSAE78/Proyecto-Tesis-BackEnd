@@ -15,6 +15,15 @@ const Administrative = sequelize.define('Administrative', {
         type: DataTypes.STRING,
         allowNull: false
     },
+    identification: {
+        type: DataTypes.STRING(10),
+        allowNull: false,
+        unique: true,
+        validate: {
+            len: [10, 10],
+            isNumeric: true
+        }
+    },    
     email: {
         type: DataTypes.STRING,
         allowNull: false,

@@ -16,9 +16,12 @@ const Professor = sequelize.define('Professor', {
         allowNull: false
     },
     identification: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
+      type: DataTypes.STRING(10),
+      allowNull: false,
+      unique: true,
+      validate: {
+          len: [10, 10],         // exactamente 10 dígitos
+          isNumeric: true }
     },
     email: {
         type: DataTypes.STRING,

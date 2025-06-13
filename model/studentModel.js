@@ -21,9 +21,12 @@ const Student = sequelize.define('Student', {
     allowNull: false
   },
   identityCard: {
-    type: DataTypes.STRING,
+    type: DataTypes.STRING(10),
     allowNull: false,
-    unique: true
+    unique: true,
+    validate: {
+        len: [10, 10],         // exactamente 10 dígitos
+        isNumeric: true} 
   },
   status: {
     type: DataTypes.ENUM('active', 'inactive'),
