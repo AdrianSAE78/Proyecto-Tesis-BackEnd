@@ -62,3 +62,30 @@ exports.deleteAdministrative = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
+
+exports.validateQRToken = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    const estudiante = await Student.findOne({
+      where: { 
+        id_student: decoded.idEst, 
+        id_legal_representative: decoded.parentId 
+      },
+      include: [firstName, lastName, identityCard]
+    });
+
+    if (!estudiante) {
+      return res.status(404).json({ message: 'Estudiante no encontrado' });
+    }
+
+    return res.json({ 
+      valid: true, 
+      student: estudiante,
+      parentId: decoded.parentId 
+    });
+  } catch (error) {
+    return res.status(401).json({ message: 'Token inválido o expirado' });
+  }
+};
