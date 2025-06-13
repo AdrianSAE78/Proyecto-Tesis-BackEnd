@@ -23,9 +23,23 @@ exports.getCourseById = async (req, res) => {
     }
 };
 
+exports.getCoursesByProfessor = async (req, res) => {
+  try {
+    let { professorId } = req.params;
+
+    let courses = await Course.findAll({
+      where: { id_professor: professorId }
+    });
+
+    res.status(200).json(courses);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener cursos del profesor', error: error.message });
+  }
+};
+
 exports.createCourse = async (req, res) => {
     try {
-        const { courseName, level, description } = req.body;
+        let { courseName, level, description } = req.body;
         let newCourse = await Course.create({ courseName, level, description });
         res.status(201).json(newCourse);
     } catch (error) {

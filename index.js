@@ -27,7 +27,7 @@ app.use(cors());
 // Montaje de rutas (sin cambios)
 app.use('/api', studentRoute);
 app.use('/api', administrativeRoute);
-app.use('/api', courseRoute);
+app.use('/api/courses', courseRoute);
 app.use('/api/asistances', asistanceRoutes);
 app.use('/api', userRoutes);
 app.use('/api', professorRoute);
