@@ -6,9 +6,9 @@ const Course = require('./courseModel');
 const Incident = require('./incidentsModel');
 const LegalRepresentative = require('./legalRepresentativeModel');
 const Professor = require('./professorModel');
+const ProfessorCourse = require('./professorCourseModel');
 const Student = require('./studentModel');
 const User = require('./userModel');
-const ProfessorCourse = require('./professorModel');
 
 LegalRepresentative.hasMany(Student, { foreignKey: 'id_legal_representative' });
 Student.belongsTo(LegalRepresentative, { foreignKey: 'id_legal_representative' });
