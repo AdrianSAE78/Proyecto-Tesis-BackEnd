@@ -3,10 +3,11 @@ const router = express.Router();
 
 const legalRepresentativeController = require('../controller/legalRepresentativeController');
 
-router.get('/legal-representatives', legalRepresentativeController.getAllLegalRepresentatives);
-router.get('/legal-representatives/:id', legalRepresentativeController.getLegalRepresentativeById);
-router.post('/legal-representatives', legalRepresentativeController.createLegalRepresentative);
-router.put('/legal-representatives/:id', legalRepresentativeController.updateLegalRepresentative);
-router.delete('/legal-representatives/:id', legalRepresentativeController.deleteLegalRepresentative);
+// No poner /legal-representatives aquí, solo usar /
+router.get('/', legalRepresentativeController.getAllLegalRepresentatives);
+router.get('/:id', legalRepresentativeController.getLegalRepresentativeById);
+router.post('/', legalRepresentativeController.createLegalRepresentative);
+router.put('/:id', legalRepresentativeController.updateLegalRepresentative);
+router.delete('/:id', legalRepresentativeController.deleteLegalRepresentative);
 
 module.exports = router;

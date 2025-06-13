@@ -44,14 +44,33 @@ exports.getStudentsByCourseId = async (req, res) => {
 
 exports.createStudent = async (req, res) => {
     try {
-        const { firstName, lastName, birthDate, identityCard, status, id_course, id_representative } = req.body;
-        let newStudent = await Student.create({ firstName, lastName, birthDate, identityCard, status, id_course, id_representative });
-        res.status(201).json(newStudent);
+      const {
+        firstName,
+        lastName,
+        birthDate,
+        identityCard,
+        status,
+        id_course,
+        id_legal_representative  // ✅ este es el nombre correcto
+      } = req.body;
+  
+      const newStudent = await Student.create({
+        firstName,
+        lastName,
+        birthDate,
+        identityCard,
+        status,
+        id_course,
+        id_legal_representative  // ✅ asegúrate de enviar este en Postman/frontend
+      });
+  
+      res.status(201).json(newStudent);  // ✅ solo una respuesta
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+      console.error(error);
+      res.status(500).json({ error: error.message });
     }
-};
+  };
+  
 
 exports.updateStudent = async (req, res) => {
     try {

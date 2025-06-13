@@ -18,7 +18,7 @@ const LegalRepresentative = sequelize.define('LegalRepresentative', {
     identification: {
         type: DataTypes.STRING,
         allowNull: false,
-        unique: true
+
     },
     phone: {
         type: DataTypes.STRING,
