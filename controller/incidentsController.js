@@ -1,5 +1,6 @@
 const Incident = require('../model/incidentsModel');
-const Student = require('../model/studentModel')
+const Student = require('../model/studentModel');
+const Professor = require('../model/professorModel');
 
 exports.getAllIncidents = async (req, res) => {
     try {
@@ -29,7 +30,13 @@ exports.getIncidentByStudentId = async (req, res) => {
     let { id_student } = req.params;
 
     let incidents = await Incident.findAll({
-      where: { id_student }
+      where: { id_student, status: 'pending'},
+      include: [
+        { model: Student, as: 'student', attributes: ['id_student', 'firstName', 'lastName'] },
+        { model: Professor, as: 'professor', attributes: ['id_professor', 'firstName', 'lastName'] }
+      ],
+      order: [['date', 'DESC']]
+ 
     });
 
     if (!incidents || incidents.length === 0) {
@@ -43,6 +50,27 @@ exports.getIncidentByStudentId = async (req, res) => {
   }
 };
 
+exports.getIncidentsByCourse = async (req, res) => {
+    try {
+        let { courseId } = req.params;
+
+        let incidents = await Incident.findAll({
+            include: [
+                {
+                    model: Student,
+                    as: 'student',
+                    where: { id_course: courseId },
+                    attributes: ['firstName', 'lastName']
+                }
+            ],
+            order: [['date', 'DESC']]
+        });
+
+        res.status(200).json(incidents);
+    } catch (error) {
+        res.status(500).json({ message: "Error al obtener incidentes", error: error.message });
+    }
+};
 
 
 exports.createIncident = async (req, res) => {
@@ -99,7 +127,8 @@ exports.getStudentsInFollowUp = async (req, res) => {
                     as: 'student',
                     attributes: ['id_student', 'lastName', 'firstName']
                 }
-            ]
+            ],
+            order: [['date', 'DESC']]
         });
 
         let students = incidents.map(inc => inc.student);

@@ -1,4 +1,6 @@
 const Asistance = require('../model/asistanceModel');
+const Student = require('../model/studentModel');
+
 
 exports.getAllAsistances = async (req, res) => {
     try {
@@ -26,7 +28,7 @@ exports.getAsistanceById = async (req, res) => {
 
 exports.createAsistance = async (req, res) => {
     try {
-        const { id_student, id_professor, date, status, justification, news } = req.body;
+        const { id_student, id_professor, id_course, date, status, justification, news } = req.body;
 
         // Validación básica de campos requeridos
         if (!id_student || !id_professor || !status) {
@@ -41,6 +43,7 @@ exports.createAsistance = async (req, res) => {
         const newAsistance = await Asistance.create({
             id_student,
             id_professor,
+            id_course,
             status,
             justification,
             news
@@ -96,5 +99,34 @@ exports.deleteAsistance = async (req, res) => {
         res.status(200).json({ message: "Asistencia eliminada exitosamente" });
     } catch (error) {
         res.status(500).json({ message: "Error al eliminar asistencia", error: error.message });
+    }
+};
+
+
+exports.getAsistancesByCourseAndStatus = async (req, res) => {
+    try {
+        const courseId = req.params.courseId;
+        const status = req.query.status;
+
+        const asistances = await Asistance.findAll({
+            where: {
+                id_course: courseId,
+                status: status
+            },
+            include: [
+                {
+                    model: Student,
+                    attributes: ['id_student', 'firstName', 'lastName']
+                }
+            ]
+        });
+
+        res.status(200).json(asistances);
+    } catch (error) {
+        console.error("Error al obtener asistencias:", error);
+        res.status(500).json({
+            message: "Error al obtener asistencias",
+            error: error.message
+        });
     }
 };

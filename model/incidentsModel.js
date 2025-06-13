@@ -1,6 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 const Student = require('./studentModel');
+const Professor = require('./professorModel');
 
 const Incident = sequelize.define('Incident', {
     id_incident: {
@@ -52,5 +53,6 @@ const Incident = sequelize.define('Incident', {
 });
 
 Incident.belongsTo(Student, { foreignKey: 'id_student', as: 'student' });
+Incident.belongsTo(Professor, { foreignKey: 'id_professor', as: 'professor' });
 
 module.exports = Incident;

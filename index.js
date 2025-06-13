@@ -36,7 +36,8 @@ app.use('/api', roleRoute);
 app.use('/api/auth', authRoute);
 
 // Iniciar el servidor
-sequelize.sync().then(() => {
+// sequelize.sync().then(() => {
+sequelize.sync({ alter: true }).then(() => {
     console.log('Base de datos conectada!');
     app.listen(PORT, () => {
         console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
