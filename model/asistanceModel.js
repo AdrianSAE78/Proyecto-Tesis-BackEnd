@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const students = require('./studentModel'); 
+const sequelize = require('../config/database'); 
 
 const Asistance = sequelize.define('Asistance', {
     id_asistance: {
@@ -57,6 +56,5 @@ const Asistance = sequelize.define('Asistance', {
     timestamps: false 
 });
 
-Asistance.belongsTo(students, { foreignKey: 'id_student' });
 
 module.exports = Asistance;

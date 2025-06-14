@@ -39,6 +39,14 @@ User.hasOne(Administrative, { foreignKey: 'id_user' });
 Professor.belongsTo(User, { foreignKey: 'id_user' });
 User.hasOne(Professor, { foreignKey: 'id_user' });
 
+// Relaciones Asistance
+Asistance.belongsTo(Student, { foreignKey: 'id_student', as: 'asistedStudent' });
+Asistance.belongsTo(Professor, { foreignKey: 'id_professor', as: 'asistanceProfessor' });
+
+// Relaciones Incident
+Incident.belongsTo(Student, { foreignKey: 'id_student', as: 'incidentStudent' });
+Incident.belongsTo(Professor, { foreignKey: 'id_professor', as: 'incidentProfessor' });
+
 module.exports = { 
   Administrative,
   Student,

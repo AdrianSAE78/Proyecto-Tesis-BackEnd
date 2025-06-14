@@ -20,19 +20,10 @@ const Course = sequelize.define('Course', {
         type: DataTypes.TEXT,
         allowNull: true
     },
-    id_professor: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'professors',
-      key: 'id_professor'
-    }
-  }
 }, {
     tableName: 'courses',
     timestamps: false
 });
 
-Course.belongsTo(Professor, { foreignKey: 'id_professor' });
 
 module.exports = Course;
