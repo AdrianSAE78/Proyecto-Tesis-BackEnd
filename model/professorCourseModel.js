@@ -2,25 +2,25 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const ProfessorCourse = sequelize.define('ProfessorCourse', {
-    id_professor: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'professors',
-        key: 'id_professor'
-      },
-      onDelete: 'CASCADE'
-    },
-    id_course: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'courses',
-        key: 'id_course'
-      },
-      onDelete: 'CASCADE'
+  id_professor: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'professors',
+      key: 'id_professor'
     }
-  }, {
-    tableName: 'professor_courses',
-    timestamps: false
-  });
-  
-  module.exports = ProfessorCourse;
+  },
+  id_course: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'courses',
+      key: 'id_course'
+    }
+  }
+}, {
+  tableName: 'professor_courses',
+  timestamps: false
+});
+
+module.exports = ProfessorCourse;

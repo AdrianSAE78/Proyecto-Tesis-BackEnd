@@ -57,4 +57,5 @@ const User = sequelize.define('User', {
 // Asociación: User pertenece a un Role
 User.belongsTo(Role, { foreignKey: 'id_role', as: 'role' });
 
+
 module.exports = User;

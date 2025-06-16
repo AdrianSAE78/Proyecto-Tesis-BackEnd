@@ -16,8 +16,12 @@ const LegalRepresentative = sequelize.define('LegalRepresentative', {
         allowNull: false
     },
     identification: {
-        type: DataTypes.STRING,
+        type: DataTypes.STRING(10),
         allowNull: false,
+        unique: true,
+        validate: {
+            len: [10, 10],         // exactamente 10 dígitos
+            isNumeric: true }
 
     },
     phone: {
