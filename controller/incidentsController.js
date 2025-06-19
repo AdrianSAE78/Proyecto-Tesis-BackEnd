@@ -35,6 +35,10 @@ exports.getIncidentsByStudentId = async (req, res) => {
         {
           model: Student,
           attributes: ['firstName', 'lastName']
+        },
+        {
+          model: Professor,
+          attributes: ['firstName', 'lastName']
         }
       ],
       order: [['date', 'DESC']]
