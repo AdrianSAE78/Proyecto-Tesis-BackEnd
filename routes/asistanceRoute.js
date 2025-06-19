@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const asistanceController = require('../controller/asistanceController');
 
+// ✅ Ruta para verificar si ya se tomó asistencia hoy
+router.get('/check/:id_course/:id_professor', asistanceController.checkAsistenciaDiaria);
+
 router.get('/', asistanceController.getAllAsistances);
 router.get('/:id', asistanceController.getAsistanceById);
 router.get('/course/:courseId', asistanceController.getAsistancesByCourseAndStatus);

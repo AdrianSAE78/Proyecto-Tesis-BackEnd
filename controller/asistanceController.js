@@ -1,3 +1,5 @@
+const { Op } = require('sequelize');
+const moment = require('moment');
 const Asistance = require('../model/asistanceModel');
 const Student = require('../model/studentModel');
 
@@ -47,34 +49,63 @@ exports.getInasistenciasByCourse = async (req, res) => {
 };
 
 exports.createAsistance = async (req, res) => {
-    try {
-        const { id_student, id_professor, id_course, date, status, justification, news } = req.body;
+  try {
+    const {
+      id_student,
+      id_professor,
+      id_course,
+      status,
+      justification,
+      news,
+    } = req.body;
 
-        // Validación básica de campos requeridos
-        if (!id_student || !id_professor || !status) {
-            return res.status(400).json({ message: "Faltan campos requeridos" });
-        }
-
-        const validStatuses = ['present', 'absent', 'late'];
-        if (!validStatuses.includes(status)) {
-        return res.status(400).json({ message: "Estado de asistencia no válido" });
-        }
-
-        const newAsistance = await Asistance.create({
-            id_student,
-            id_professor,
-            id_course,
-            status,
-            justification,
-            news
-        });
-
-        
-
-        res.status(201).json({ message: "Asistencia creada exitosamente", asistance: newAsistance });
-    } catch (error) {
-        res.status(500).json({ message: "Error al crear asistencia", error: error.message });
+    if (!id_student || !id_professor || !id_course || !status) {
+      return res.status(400).json({ message: "Faltan campos requeridos" });
     }
+
+    const validStatuses = ["present", "absent", "late"];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Estado de asistencia no válido" });
+    }
+
+    const todayStart = moment().startOf("day").toDate();
+    const todayEnd = moment().endOf("day").toDate();
+
+    // Verificar si ya existe asistencia registrada hoy para ese estudiante en ese curso
+    const yaRegistrado = await Asistance.findOne({
+      where: {
+        id_student,
+        id_course,
+        date: {
+          [Op.between]: [todayStart, todayEnd],
+        },
+      },
+    });
+
+    if (yaRegistrado) {
+      return res.status(409).json({
+        message: "Ya se registró asistencia para este estudiante hoy en este curso.",
+      });
+    }
+
+    const nuevaAsistencia = await Asistance.create({
+      id_student,
+      id_professor,
+      id_course,
+      status,
+      justification,
+      news,
+      date: new Date(), // registramos la hora actual
+    });
+
+    res.status(201).json({
+      message: "✅ Asistencia registrada exitosamente.",
+      asistance: nuevaAsistencia,
+    });
+  } catch (error) {
+    console.error("Error al crear asistencia:", error);
+    res.status(500).json({ message: "Error del servidor", error: error.message });
+  }
 };
 
 exports.updateAsistance = async (req, res) => {
@@ -173,5 +204,33 @@ exports.getInasistenciasByProfessorCourse = async (req, res) => {
   } catch (error) {
     console.error("Error al obtener inasistencias: ", error);
     res.status(500).json({ message: "Error al obtener inasistencias", error: error.message });
+  }
+};
+
+exports.checkAsistenciaDiaria = async (req, res) => {
+  try {
+    const { id_course, id_professor } = req.params;
+
+    const startOfDay = moment().startOf('day').toDate();
+    const endOfDay = moment().endOf('day').toDate();
+
+    const asistencia = await Asistance.findOne({
+      where: {
+        id_course,
+        id_professor,
+        date: {
+          [Op.between]: [startOfDay, endOfDay]
+        }
+      }
+    });
+
+    if (asistencia) {
+      return res.json(true);
+    } else {
+      return res.json(false);
+    }
+  } catch (error) {
+    console.error("Error al verificar asistencia diaria:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
   }
 };
