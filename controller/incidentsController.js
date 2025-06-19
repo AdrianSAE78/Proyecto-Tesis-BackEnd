@@ -25,30 +25,28 @@ exports.getIncidentById = async (req, res) => {
     }
 };
 
-exports.getIncidentByStudentId = async (req, res) => {
+exports.getIncidentsByStudentId = async (req, res) => {
   try {
-    let { id_student } = req.params;
+    const { id } = req.params;
 
-    let incidents = await Incident.findAll({
-      where: { id_student, status: 'pending'},
+    const incidents = await Incident.findAll({
+      where: { id_student: id },
       include: [
-        { model: Student, as: 'student', attributes: ['id_student', 'firstName', 'lastName'] },
-        { model: Professor, as: 'professor', attributes: ['id_professor', 'firstName', 'lastName'] }
+        {
+          model: Student,
+          attributes: ['firstName', 'lastName']
+        }
       ],
       order: [['date', 'DESC']]
- 
     });
-
-    if (!incidents || incidents.length === 0) {
-      return res.status(404).json({ message: 'No se encontraron incidentes para este estudiante' });
-    }
 
     res.status(200).json(incidents);
   } catch (error) {
-    console.error("Error al obtener incidentes por estudiante:", error);
+    console.error("Error al obtener incidentes:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 exports.getIncidentsByCourse = async (req, res) => {
     try {

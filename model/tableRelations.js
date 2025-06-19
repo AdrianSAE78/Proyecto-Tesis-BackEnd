@@ -66,8 +66,8 @@ Asistance.belongsTo(Student, { foreignKey: 'id_student', as: 'asistedStudent' })
 Asistance.belongsTo(Professor, { foreignKey: 'id_professor', as: 'asistanceProfessor' });
 
 // Relaciones Incident
-Incident.belongsTo(Student, { foreignKey: 'id_student', as: 'incidentStudent' });
-Incident.belongsTo(Professor, { foreignKey: 'id_professor', as: 'incidentProfessor' });
+Incident.belongsTo(Student, { foreignKey: 'id_student' });
+Incident.belongsTo(Professor, { foreignKey: 'id_professor' });
 
 // Exportar modelos
 
