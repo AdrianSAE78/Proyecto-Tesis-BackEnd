@@ -33,6 +33,10 @@ Course.belongsToMany(Professor, {
   as: 'professors'
 });
 
+//Relaciones directas para hacer include desde ProfessorCourse
+ProfessorCourse.belongsTo(Professor, { foreignKey: 'id_professor', as: 'professor' });
+ProfessorCourse.belongsTo(Course, { foreignKey: 'id_course', as: 'course' });
+
 // Student ↔ Asistance (1:N)
 Student.hasMany(Asistance, { foreignKey: 'id_student' });
 Asistance.belongsTo(Student, { foreignKey: 'id_student' });

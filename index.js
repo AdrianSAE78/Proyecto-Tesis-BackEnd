@@ -14,6 +14,7 @@ const asistanceRoutes = require('./routes/asistanceRoute');
 const incidentsRoute = require('./routes/incidentsRoute');
 const legalRepresentativeRoute = require('./routes/legalRepresentativeRoute');
 const professorRoute = require('./routes/professorRoute');
+const professorCourseRoute = require('./routes/professorCourseRoute');
 const roleRoute = require('./routes/roleRoute');
 const authRoute = require('./routes/authRoute');    // Rutas de login y (posiblemente) registro
 
@@ -28,6 +29,7 @@ app.use(cors());                      // Habilita CORS para cualquier dominio
 
 // -------------------- RUTAS API --------------------
 // Rutas agrupadas bajo /api o subrutas específicas
+app.use('/api/professor-courses', professorCourseRoute);
 app.use('/api', studentRoute);
 app.use('/api', administrativeRoute);
 app.use('/api/courses', courseRoute);
