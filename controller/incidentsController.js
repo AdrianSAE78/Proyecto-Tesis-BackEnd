@@ -115,14 +115,14 @@ exports.deleteIncident = async (req, res) => {
     }
 };
 
+// controller/incidentsController.js
 exports.getStudentsInFollowUp = async (req, res) => {
   try {
     const incidents = await Incident.findAll({
       where: { status: 'pending' },
       include: [
         {
-          model: Student,
-          as: 'incidentStudent',
+          model: Student, // 👈 sin 'as'
           attributes: ['id_student', 'firstName', 'lastName']
         }
       ],
@@ -133,7 +133,7 @@ exports.getStudentsInFollowUp = async (req, res) => {
     const seen = new Set();
 
     for (const inc of incidents) {
-      const student = inc.incidentStudent;
+      const student = inc.Student; // 👈 cambia esto también
       if (student && !seen.has(student.id_student)) {
         seen.add(student.id_student);
         uniqueStudents.push(student);
@@ -146,4 +146,5 @@ exports.getStudentsInFollowUp = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
