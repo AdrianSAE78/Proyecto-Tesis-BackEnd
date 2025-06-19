@@ -94,7 +94,9 @@ const register = async (req, res) => {
         userPayload.id_administrative = id_administrative;
         break;
       case 'professor':
-        userPayload.id_professor = id_professor;
+        const professor = await Professor.findOne({ where: { id_user: user.id_user } });
+        if (!professor) return res.status(404).json({ message: 'Profesor no encontrado' });
+        roleId = professor.id_professor;
         break;
       case 'legalRepresentative':
         userPayload.id_representative = id_representative;

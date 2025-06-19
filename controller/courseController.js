@@ -25,13 +25,13 @@ exports.getCourseById = async (req, res) => {
 };
 
 exports.getCoursesByProfessor = async (req, res) => {
-  try {
-    const { professorId } = req.params;
+  const { id } = req.params;
 
-    const professor = await Professor.findByPk(professorId, {
+  try {
+    const professor = await Professor.findByPk(id, {
       include: {
         model: Course,
-        as: 'courses',
+        as: 'courses', // Debe coincidir con el alias en la relación N:M
         through: { attributes: [] }
       }
     });
@@ -40,10 +40,10 @@ exports.getCoursesByProfessor = async (req, res) => {
       return res.status(404).json({ message: 'Profesor no encontrado' });
     }
 
-    res.status(200).json(professor.courses);
+    return res.status(200).json(professor.courses);
   } catch (error) {
-    console.error('Error al obtener cursos por profesor:', error);
-    res.status(500).json({ message: 'Error interno del servidor', error: error.message });
+    console.error('Error al obtener cursos del profesor:', error);
+    return res.status(500).json({ message: 'Error al obtener cursos del profesor', error: error.message });
   }
 };
 
