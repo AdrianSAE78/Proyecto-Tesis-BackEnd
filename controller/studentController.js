@@ -2,13 +2,16 @@ const Student = require('../model/studentModel');
 
 exports.getAllStudents = async (req, res) => {
     try {
-        let students = await Student.findAll();
+        let students = await Student.findAll({
+            order: [['lastName', 'ASC']]
+        });
         res.status(200).json(students);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
     }
 };
+
 
 exports.getStudentById = async (req, res) => {
     try {
@@ -24,21 +27,26 @@ exports.getStudentById = async (req, res) => {
 };
 
 exports.getStudentsByCourseId = async (req, res) => {
-    try {
-        const { courseId } = req.params;
-        const students = await Student.findAll({
-            where: { id_course: courseId }
-        });
+  try {
+    const { courseId } = req.params;
 
-        if (!students || students.length === 0) {
-            return res.status(404).json({ message: "No students found for this course." });
-        }
+    const students = await Student.findAll({
+      where: { id_course: courseId },
+      order: [
+        ['lastName', 'ASC'],
+        ['firstName', 'ASC']
+      ]
+    });
 
-        res.status(200).json(students);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+    if (!students || students.length === 0) {
+      return res.status(404).json({ message: "No students found for this course." });
     }
+
+    res.status(200).json(students);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 
