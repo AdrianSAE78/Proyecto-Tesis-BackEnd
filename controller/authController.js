@@ -4,6 +4,8 @@ require('dotenv').config();
 
 const User = require('../model/userModel');
 const Role = require('../model/roleModel');
+const { Professor } = require('../model/tableRelations');
+
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -75,11 +77,9 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Verificar si el rol existe
     const role = await Role.findOne({ where: { id_role } });
     if (!role) return res.status(400).json({ message: 'Rol no válido' });
 
-    // Crear el usuario con la llave foránea correspondiente
     const userPayload = {
       user_name,
       password: hashedPassword,
@@ -94,9 +94,7 @@ const register = async (req, res) => {
         userPayload.id_administrative = id_administrative;
         break;
       case 'professor':
-        const professor = await Professor.findOne({ where: { id_user: user.id_user } });
-        if (!professor) return res.status(404).json({ message: 'Profesor no encontrado' });
-        roleId = professor.id_professor;
+        userPayload.id_professor = id_professor;
         break;
       case 'legalRepresentative':
         userPayload.id_representative = id_representative;
