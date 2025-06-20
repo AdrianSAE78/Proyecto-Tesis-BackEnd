@@ -207,6 +207,32 @@ exports.getInasistenciasByProfessorCourse = async (req, res) => {
   }
 };
 
+exports.getAtrazosByProfessorCourse = async (req, res) => {
+  try {
+    const { id_professor, id_course } = req.params;
+
+    const atrasos = await Asistance.findAll({
+      where: {
+        id_professor: id_professor,
+        id_course: id_course,
+        status: 'late' // 🔁 Cambiado a 'late'
+      },
+      include: [
+        {
+          model: Student,
+          foreignKey: 'id_student'
+        }
+      ],
+      order: [['date', 'DESC']]
+    });
+
+    res.status(200).json(atrasos);
+  } catch (error) {
+    console.error("Error al obtener atrasos: ", error);
+    res.status(500).json({ message: "Error al obtener atrasos", error: error.message });
+  }
+};
+
 exports.checkAsistenciaDiaria = async (req, res) => {
   try {
     const { id_course, id_professor } = req.params;
