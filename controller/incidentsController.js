@@ -126,7 +126,7 @@ exports.getStudentsInFollowUp = async (req, res) => {
       where: { status: 'pending' },
       include: [
         {
-          model: Student, // 👈 sin 'as'
+          model: Student, 
           attributes: ['id_student', 'firstName', 'lastName']
         }
       ],
@@ -150,5 +150,42 @@ exports.getStudentsInFollowUp = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+exports.getStudentsInFollowUpByProfessor = async (req, res) => {
+  try {
+    const { id_professor } = req.params;
+
+    const incidents = await Incident.findAll({
+      where: {
+        status: 'pending',
+        id_professor: id_professor
+      },
+      include: [
+        {
+          model: Student,
+          attributes: ['id_student', 'firstName', 'lastName']
+        }
+      ],
+      order: [['date', 'DESC']]
+    });
+
+    const uniqueStudents = [];
+    const seen = new Set();
+
+    for (const inc of incidents) {
+      const student = inc.Student;
+      if (student && !seen.has(student.id_student)) {
+        seen.add(student.id_student);
+        uniqueStudents.push(student);
+      }
+    }
+
+    res.status(200).json(uniqueStudents);
+  } catch (error) {
+    console.error("Error al obtener estudiantes en seguimiento:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 
 
