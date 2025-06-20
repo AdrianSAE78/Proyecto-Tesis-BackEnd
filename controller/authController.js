@@ -4,6 +4,9 @@ require('dotenv').config();
 
 const User = require('../model/userModel');
 const Role = require('../model/roleModel');
+const Administrative = require('../model/administrativeModel');
+const Professor = require('../model/professorModel');
+const LegalRepresentative = require('../model/legalRepresentativeModel');
 
 const SECRET_KEY = process.env.SECRET_KEY;
 
@@ -27,16 +30,37 @@ const login = async (req, res) => {
     if (!isPasswordValid) return res.status(401).json({ message: 'Contraseña incorrecta' });
 
     let roleId = null;
+    let firstName = null;
+    let lastName = null;
+    let email = null;
 
     switch (user.role.role_name) {
       case 'administrative':
-        roleId = user.id_administrative;
+        const admin = await Administrative.findByPk(user.id_administrative);
+        if (admin) {
+          roleId = admin.id_administrative;
+          firstName = admin.firstName;
+          lastName = admin.lastName;
+          email = admin.email;
+        }
         break;
       case 'professor':
-        roleId = user.id_professor;
+        const prof = await Professor.findByPk(user.id_professor);
+        if (prof) {
+          roleId = prof.id_professor;
+          firstName = prof.firstName;
+          lastName = prof.lastName;
+          email = prof.email;
+        }
         break;
       case 'legalRepresentative':
-        roleId = user.id_representative;
+        const parent = await LegalRepresentative.findByPk(user.id_representative);
+        if (parent) {
+          roleId = parent.id_representative;
+          firstName = parent.firstName;
+          lastName = parent.lastName;
+          email = parent.email;
+        }
         break;
     }
 
@@ -44,7 +68,10 @@ const login = async (req, res) => {
       id_user: user.id_user,
       user_name: user.user_name,
       role: user.role.role_name,
-      roleId
+      roleId,
+      firstName,
+      lastName,
+      email
     };
 
     const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '2h' });
@@ -75,11 +102,9 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Verificar si el rol existe
     const role = await Role.findOne({ where: { id_role } });
     if (!role) return res.status(400).json({ message: 'Rol no válido' });
 
-    // Crear el usuario con la llave foránea correspondiente
     const userPayload = {
       user_name,
       password: hashedPassword,
