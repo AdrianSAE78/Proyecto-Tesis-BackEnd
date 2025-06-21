@@ -1,4 +1,4 @@
-const { Student, Course, Professor } = require('../model/tableRelations');
+const { Student, Course, Professor, LegalRepresentative, ProfessorCourse } = require('../model/tableRelations');
 const { Op } = require("sequelize");
 
 exports.getAllStudents = async (req, res) => {
@@ -112,9 +112,9 @@ exports.deleteStudent = async (req, res) => {
 
 
 exports.searchStudentsByLastNameAndProfessor = async (req, res) => {
-  try {
-    const { apellido, id_professor } = req.params;
+  const { apellido, id_professor } = req.params;
 
+  try {
     const students = await Student.findAll({
       where: {
         lastName: { [Op.iLike]: `%${apellido}%` }
@@ -122,21 +122,26 @@ exports.searchStudentsByLastNameAndProfessor = async (req, res) => {
       include: [
         {
           model: Course,
+          required: true,
           include: [
             {
               model: Professor,
               as: 'professors',
-              where: { id_professor },
-              through: { attributes: [] } 
+              where: { id_professor: id_professor },
+              through: { attributes: [] },
+              required: true
             }
           ]
+        },
+        {
+          model: LegalRepresentative
         }
       ]
     });
 
     res.status(200).json(students);
   } catch (error) {
-    console.error("Error al buscar estudiantes por apellido:", error);
+    console.error("Error al buscar estudiantes:", error);
     res.status(500).json({ message: "Error al buscar estudiantes", error });
   }
 };
