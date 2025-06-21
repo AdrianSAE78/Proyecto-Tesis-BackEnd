@@ -15,7 +15,8 @@ const incidentsRoute = require('./routes/incidentsRoute');
 const legalRepresentativeRoute = require('./routes/legalRepresentativeRoute');
 const professorRoute = require('./routes/professorRoute');
 const roleRoute = require('./routes/roleRoute');
-const authRoute = require('./routes/authRoute');    // Rutas de login y (posiblemente) registro
+const authRoute = require('./routes/authRoute');
+const newsRoute = require('./routes/newsRoute');
 
 // -------------------- CONFIGURACIÓN --------------------
 const app = express();
@@ -27,7 +28,6 @@ app.use(bodyParser.json());           // Permite interpretar JSON en las peticio
 app.use(cors());                      // Habilita CORS para cualquier dominio
 
 // -------------------- RUTAS API --------------------
-// Rutas agrupadas bajo /api o subrutas específicas
 app.use('/api', studentRoute);
 app.use('/api', administrativeRoute);
 app.use('/api/courses', courseRoute);
@@ -37,10 +37,10 @@ app.use('/api', professorRoute);
 app.use('/api/legal-representatives', legalRepresentativeRoute);
 app.use('/api/incidents', incidentsRoute);
 app.use('/api', roleRoute);
-app.use('/api/auth', authRoute); // 👈 Aquí va tu login y (posiblemente) register
+app.use('/api/auth', authRoute);
+app.use('/api/news', newsRoute);
 
 // -------------------- INICIO DEL SERVIDOR --------------------
-// Sincroniza los modelos con la BD (usa alter para evitar duplicados/conflictos)
 //sequelize.sync({ force: true }) --> Para eliminar todos los datos de mi DB
 sequelize.sync({ alter: true }).then(() => {
     console.log('✅ Base de datos conectada!');
