@@ -83,12 +83,12 @@ const login = async (req, res) => {
   }
 };
 
-// REGISTER (usando id_role directamente)
+// REGISTER (usando role_name en lugar de id_role)
 const register = async (req, res) => {
   const {
     user_name,
     password,
-    id_role,
+    role_name,
     id_administrative,
     id_professor,
     id_representative
@@ -102,13 +102,13 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const role = await Role.findOne({ where: { id_role } });
+    const role = await Role.findOne({ where: { role_name } });
     if (!role) return res.status(400).json({ message: 'Rol no válido' });
 
     const userPayload = {
       user_name,
       password: hashedPassword,
-      id_role,
+      id_role: role.id_role,
       id_administrative: null,
       id_professor: null,
       id_representative: null
@@ -141,4 +141,63 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { login, register };
+const registerAndLoginAdmin = async (req, res) => {
+  const { firstName, lastName, identification, email, phone } = req.body;
+
+  try {
+    // 1. Crear el administrativo
+    const newAdmin = await Administrative.create({
+      firstName,
+      lastName,
+      identification,
+      email,
+      phone
+    });
+
+    // 2. Crear el usuario asociado
+    const userName = email.split('@')[0];
+    const hashedPassword = await bcrypt.hash(identification, 10);
+    const role = await Role.findOne({ where: { role_name: 'administrative' } });
+
+    if (!role) return res.status(400).json({ message: 'Rol no encontrado' });
+
+    const newUser = await User.create({
+      user_name: userName,
+      password: hashedPassword,
+      id_role: role.id_role,
+      id_administrative: newAdmin.id_administrative
+    });
+
+    // 3. Asociar id_user al administrativo
+    await newAdmin.update({ id_user: newUser.id_user });
+
+    // 4. Consultar el administrativo actualizado
+    const fullAdmin = await Administrative.findByPk(newAdmin.id_administrative);
+
+    // 5. Crear token
+    const tokenPayload = {
+      id_user: newUser.id_user,
+      user_name: userName,
+      role: 'administrative',
+      roleId: fullAdmin.id_administrative,
+      firstName: fullAdmin.firstName,
+      lastName: fullAdmin.lastName,
+      email: fullAdmin.email
+    };
+
+    const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '2h' });
+
+    return res.status(201).json({
+      message: 'Administrador creado y autenticado correctamente',
+      token,
+      user: tokenPayload
+    });
+  } catch (error) {
+    console.error('❌ Error en registerAndLoginAdmin:', error);
+    return res.status(500).json({ error: 'Error del servidor' });
+  }
+};
+
+
+module.exports = { login, register, registerAndLoginAdmin };
+

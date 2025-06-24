@@ -16,6 +16,7 @@ const legalRepresentativeRoute = require('./routes/legalRepresentativeRoute');
 const professorRoute = require('./routes/professorRoute');
 const roleRoute = require('./routes/roleRoute');
 const authRoute = require('./routes/authRoute');    // Rutas de login y (posiblemente) registro
+const createDefaultAdmin = require('./controller/createDefaultAdmin');
 
 // -------------------- CONFIGURACIÓN --------------------
 const app = express();
@@ -42,8 +43,9 @@ app.use('/api/auth', authRoute); // 👈 Aquí va tu login y (posiblemente) regi
 // -------------------- INICIO DEL SERVIDOR --------------------
 // Sincroniza los modelos con la BD (usa alter para evitar duplicados/conflictos)
 //sequelize.sync({ force: true }) --> Para eliminar todos los datos de mi DB
-sequelize.sync({ alter: true }).then(() => {
+sequelize.sync({ force: true }).then(() => {
     console.log('✅ Base de datos conectada!');
+    createDefaultAdmin(); 
     app.listen(PORT, () => {
         console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
     });

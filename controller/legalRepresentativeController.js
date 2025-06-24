@@ -1,12 +1,17 @@
+const bcrypt = require('bcrypt');
+const jwt = require("jsonwebtoken");
+const QRCode = require("qrcode");
+
 const LegalRepresentative = require("../model/legalRepresentativeModel");
+const User = require('../model/userModel');
+const { sendCredentialsEmail } = require("../services/emailService");
+
 const {
   Student,
   Asistance,
   Incident,
   Professor,
 } = require("../model/tableRelations");
-const QRCode = require("qrcode");
-const jwt = require("jsonwebtoken");
 
 exports.getAllLegalRepresentatives = async (req, res) => {
   try {
@@ -25,7 +30,7 @@ exports.getAllLegalRepresentatives = async (req, res) => {
 
 exports.getLegalRepresentativeById = async (req, res) => {
   try {
-    let representative = await LegalRepresentative.findByPk(req.params.id);
+    const representative = await LegalRepresentative.findByPk(req.params.id);
     if (!representative) {
       return res
         .status(404)
@@ -41,9 +46,10 @@ exports.getLegalRepresentativeById = async (req, res) => {
 exports.createLegalRepresentative = async (req, res) => {
   try {
     console.log("📥 Datos recibidos para representante legal:", req.body);
-    const { firstName, lastName, identification, phone, email, address } =
-      req.body;
-    let newRepresentative = await LegalRepresentative.create({
+    const { firstName, lastName, identification, phone, email, address } = req.body;
+
+    // 1. Crear representante
+    const newRepresentative = await LegalRepresentative.create({
       firstName,
       lastName,
       identification,
@@ -51,7 +57,29 @@ exports.createLegalRepresentative = async (req, res) => {
       email,
       address,
     });
-    res.status(201).json(newRepresentative);
+
+    // 2. Preparar credenciales de usuario
+    const userName = email.split('@')[0];
+    const hashedPassword = await bcrypt.hash(identification, 10);
+    const roleId = 3; // ID del rol 'legal_representative'
+
+    // 3. Crear usuario asociado
+    const newUser = await User.create({
+      user_name: userName,
+      password: hashedPassword,
+      id_role: roleId,
+      id_representative: newRepresentative.id
+    });
+
+    // 4. Enviar correo con credenciales
+    await sendCredentialsEmail(
+      email,
+      `${firstName} ${lastName}`,
+      userName,
+      identification
+    );
+
+    res.status(201).json({ representative: newRepresentative, user: newUser });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -60,14 +88,13 @@ exports.createLegalRepresentative = async (req, res) => {
 
 exports.updateLegalRepresentative = async (req, res) => {
   try {
-    let representative = await LegalRepresentative.findByPk(req.params.id);
+    const representative = await LegalRepresentative.findByPk(req.params.id);
     if (!representative) {
       return res
         .status(404)
         .json({ error: "Representante legal no encontrado" });
     }
-    const { firstName, lastName, identification, phone, email, address } =
-      req.body;
+    const { firstName, lastName, identification, phone, email, address } = req.body;
     await representative.update({
       firstName,
       lastName,
@@ -85,7 +112,7 @@ exports.updateLegalRepresentative = async (req, res) => {
 
 exports.deleteLegalRepresentative = async (req, res) => {
   try {
-    let representative = await LegalRepresentative.findByPk(req.params.id);
+    const representative = await LegalRepresentative.findByPk(req.params.id);
     if (!representative) {
       return res
         .status(404)
@@ -211,9 +238,7 @@ exports.getAsistance = async (req, res) => {
       status: a.status,
       notes: a.news || "",
       justification: a.justification || "",
-      studentName: `${a.student?.firstName || ""} ${
-        a.student?.lastName || ""
-      }`.trim(),
+      studentName: `${a.student?.firstName || ""} ${a.student?.lastName || ""}`.trim(),
       grade: a.student?.id_course || "",
       professor: a.professor
         ? `${a.professor.firstName} ${a.professor.lastName}`

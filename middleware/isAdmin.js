@@ -1,9 +1,8 @@
 const isAdmin = (req, res, next) => {
-    if (req.user?.role !== 'administrative') {
-      return res.status(403).json({ message: 'Acceso restringido solo para administradores' });
-    }
-    next();
-  };
+  if (!['admin', 'administrative'].includes(req.user?.role)) {
+    return res.status(403).json({ message: 'Acceso denegado' });
+  }
+  next();
+};
   
   module.exports = isAdmin;
-  
