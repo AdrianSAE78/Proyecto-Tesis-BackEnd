@@ -188,4 +188,47 @@ exports.getStudentsInFollowUpByProfessor = async (req, res) => {
 };
 
 
+exports.getIncidentHistoryByCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const incidents = await Incident.findAll({
+      where: {
+        status: ['pending', 'resolved']
+      },
+      include: [
+        {
+          model: Student,
+          where: { id_course: courseId },
+          attributes: ['id_student', 'firstName', 'lastName']
+        },
+        {
+          model: Professor,
+          attributes: ['firstName', 'lastName']
+        }
+      ],
+      order: [['date', 'DESC']]
+    });
+
+    const grouped = {};
+
+    incidents.forEach((incident) => {
+      const student = incident.Student;
+      if (!grouped[student.id_student]) {
+        grouped[student.id_student] = {
+          student,
+          incidents: []
+        };
+      }
+      grouped[student.id_student].incidents.push(incident);
+    });
+
+    res.status(200).json(Object.values(grouped));
+  } catch (error) {
+    console.error("Error al obtener historial de incidentes por curso:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 
