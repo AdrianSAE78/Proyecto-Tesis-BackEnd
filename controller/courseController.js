@@ -1,4 +1,5 @@
-const Course = require('../model/courseModel');
+const { Professor, Course } = require('../model/tableRelations');
+const ProfessorCourse = require('../model/professorCourseModel');
 
 exports.getAllCourses = async (req, res) => {
     try {
@@ -24,16 +25,53 @@ exports.getCourseById = async (req, res) => {
 };
 
 exports.getCoursesByProfessor = async (req, res) => {
-  try {
-    let { professorId } = req.params;
+  const { id } = req.params;
 
-    let courses = await Course.findAll({
-      where: { id_professor: professorId }
+  try {
+    const professor = await Professor.findByPk(id, {
+      include: {
+        model: Course,
+        as: 'courses', // Debe coincidir con el alias en la relación N:M
+        through: { attributes: [] }
+      }
     });
 
-    res.status(200).json(courses);
+    if (!professor) {
+      return res.status(404).json({ message: 'Profesor no encontrado' });
+    }
+
+    return res.status(200).json(professor.courses);
   } catch (error) {
-    res.status(500).json({ message: 'Error al obtener cursos del profesor', error: error.message });
+    console.error('Error al obtener cursos del profesor:', error);
+    return res.status(500).json({ message: 'Error al obtener cursos del profesor', error: error.message });
+  }
+};
+
+exports.assignCourseToProfessor = async (req, res) => {
+  try {
+    const { professorId, courseId } = req.body;
+
+    if (!professorId || !courseId) {
+      return res.status(400).json({ message: "Faltan parámetros necesarios" });
+    }
+
+    const exists = await ProfessorCourse.findOne({
+      where: { id_professor: professorId, id_course: courseId }
+    });
+
+    if (exists) {
+      return res.status(409).json({ message: "Este curso ya está asignado al profesor" });
+    }
+
+    const assignment = await ProfessorCourse.create({
+      id_professor: professorId,
+      id_course: courseId
+    });
+
+    res.status(201).json({ message: "Curso asignado al profesor exitosamente", assignment });
+  } catch (error) {
+    console.error("Error al asignar curso:", error);
+    res.status(500).json({ error: error.message });
   }
 };
 

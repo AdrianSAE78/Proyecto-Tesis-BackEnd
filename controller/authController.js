@@ -5,6 +5,11 @@ require('dotenv').config();
 const User = require('../model/userModel');
 const Role = require('../model/roleModel');
 
+const { Professor } = require('../model/tableRelations');
+const Administrative = require('../model/administrativeModel');
+const ProfessorModel = require('../model/professorModel');
+const LegalRepresentative = require('../model/legalRepresentativeModel');
+
 const SECRET_KEY = process.env.SECRET_KEY;
 
 // LOGIN
@@ -27,16 +32,37 @@ const login = async (req, res) => {
     if (!isPasswordValid) return res.status(401).json({ message: 'Contraseña incorrecta' });
 
     let roleId = null;
+    let firstName = null;
+    let lastName = null;
+    let email = null;
 
     switch (user.role.role_name) {
       case 'administrative':
-        roleId = user.id_administrative;
+        const admin = await Administrative.findByPk(user.id_administrative);
+        if (admin) {
+          roleId = admin.id_administrative;
+          firstName = admin.firstName;
+          lastName = admin.lastName;
+          email = admin.email;
+        }
         break;
       case 'professor':
-        roleId = user.id_professor;
+        const prof = await Professor.findByPk(user.id_professor);
+        if (prof) {
+          roleId = prof.id_professor;
+          firstName = prof.firstName;
+          lastName = prof.lastName;
+          email = prof.email;
+        }
         break;
       case 'legalRepresentative':
-        roleId = user.id_representative;
+        const parent = await LegalRepresentative.findByPk(user.id_representative);
+        if (parent) {
+          roleId = parent.id_representative;
+          firstName = parent.firstName;
+          lastName = parent.lastName;
+          email = parent.email;
+        }
         break;
     }
 
@@ -44,7 +70,10 @@ const login = async (req, res) => {
       id_user: user.id_user,
       user_name: user.user_name,
       role: user.role.role_name,
-      roleId
+      roleId,
+      firstName,
+      lastName,
+      email
     };
 
     const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '2h' });
@@ -56,12 +85,12 @@ const login = async (req, res) => {
   }
 };
 
-// REGISTER (usando id_role directamente)
+// REGISTER (usando role_name en lugar de id_role)
 const register = async (req, res) => {
   const {
     user_name,
     password,
-    id_role,
+    role_name,
     id_administrative,
     id_professor,
     id_representative
@@ -75,15 +104,13 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Verificar si el rol existe
-    const role = await Role.findOne({ where: { id_role } });
+    const role = await Role.findOne({ where: { role_name } });
     if (!role) return res.status(400).json({ message: 'Rol no válido' });
 
-    // Crear el usuario con la llave foránea correspondiente
     const userPayload = {
       user_name,
       password: hashedPassword,
-      id_role,
+      id_role: role.id_role,
       id_administrative: null,
       id_professor: null,
       id_representative: null
@@ -116,4 +143,63 @@ const register = async (req, res) => {
   }
 };
 
-module.exports = { login, register };
+const registerAndLoginAdmin = async (req, res) => {
+  const { firstName, lastName, identification, email, phone } = req.body;
+
+  try {
+    // 1. Crear el administrativo
+    const newAdmin = await Administrative.create({
+      firstName,
+      lastName,
+      identification,
+      email,
+      phone
+    });
+
+    // 2. Crear el usuario asociado
+    const userName = email.split('@')[0];
+    const hashedPassword = await bcrypt.hash(identification, 10);
+    const role = await Role.findOne({ where: { role_name: 'administrative' } });
+
+    if (!role) return res.status(400).json({ message: 'Rol no encontrado' });
+
+    const newUser = await User.create({
+      user_name: userName,
+      password: hashedPassword,
+      id_role: role.id_role,
+      id_administrative: newAdmin.id_administrative
+    });
+
+    // 3. Asociar id_user al administrativo
+    await newAdmin.update({ id_user: newUser.id_user });
+
+    // 4. Consultar el administrativo actualizado
+    const fullAdmin = await Administrative.findByPk(newAdmin.id_administrative);
+
+    // 5. Crear token
+    const tokenPayload = {
+      id_user: newUser.id_user,
+      user_name: userName,
+      role: 'administrative',
+      roleId: fullAdmin.id_administrative,
+      firstName: fullAdmin.firstName,
+      lastName: fullAdmin.lastName,
+      email: fullAdmin.email
+    };
+
+    const token = jwt.sign(tokenPayload, SECRET_KEY, { expiresIn: '2h' });
+
+    return res.status(201).json({
+      message: 'Administrador creado y autenticado correctamente',
+      token,
+      user: tokenPayload
+    });
+  } catch (error) {
+    console.error('❌ Error en registerAndLoginAdmin:', error);
+    return res.status(500).json({ error: 'Error del servidor' });
+  }
+};
+
+
+module.exports = { login, register, registerAndLoginAdmin };
+

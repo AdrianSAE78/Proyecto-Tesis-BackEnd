@@ -9,5 +9,8 @@ router.get('/students/:id', studentController.getStudentById);
 router.post('/students', studentController.createStudent);
 router.put('/students/:id', studentController.updateStudent);
 router.delete('/students/:id', studentController.deleteStudent);
+router.get('/search/:apellido/:id_professor', studentController.searchStudentsByLastNameAndProfessor);
+
+
 
 module.exports = router;

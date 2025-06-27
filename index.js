@@ -14,9 +14,15 @@ const asistanceRoutes = require('./routes/asistanceRoute');
 const incidentsRoute = require('./routes/incidentsRoute');
 const legalRepresentativeRoute = require('./routes/legalRepresentativeRoute');
 const professorRoute = require('./routes/professorRoute');
+const professorCourseRoute = require('./routes/professorCourseRoute');
 const roleRoute = require('./routes/roleRoute');
+<<<<<<< HEAD
 const authRoute = require('./routes/authRoute');
 const newsRoute = require('./routes/newsRoute');
+=======
+const authRoute = require('./routes/authRoute');    // Rutas de login y (posiblemente) registro
+const createDefaultAdmin = require('./controller/createDefaultAdmin');
+>>>>>>> 215d27751f496063f8cb344f6ec479fbe9044f6a
 
 // -------------------- CONFIGURACIÓN --------------------
 const app = express();
@@ -28,6 +34,8 @@ app.use(bodyParser.json());           // Permite interpretar JSON en las peticio
 app.use(cors());                      // Habilita CORS para cualquier dominio
 
 // -------------------- RUTAS API --------------------
+// Rutas agrupadas bajo /api o subrutas específicas
+app.use('/api/professor-courses', professorCourseRoute);
 app.use('/api', studentRoute);
 app.use('/api', administrativeRoute);
 app.use('/api/courses', courseRoute);
@@ -44,6 +52,7 @@ app.use('/api/news', newsRoute);
 //sequelize.sync({ force: true }) --> Para eliminar todos los datos de mi DB
 sequelize.sync({ alter: true }).then(() => {
     console.log('✅ Base de datos conectada!');
+    createDefaultAdmin(); 
     app.listen(PORT, () => {
         console.log(`🚀 Servidor ejecutándose en http://localhost:${PORT}`);
     });

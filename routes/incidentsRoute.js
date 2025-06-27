@@ -3,11 +3,14 @@ const router = express.Router();
 
 const incidentController = require('../controller/incidentsController');
 
-router.get('/students/:id_student', incidentController.getIncidentByStudentId);
+router.get('/students/:id', incidentController.getIncidentsByStudentId);
+router.get('/students-follow/:id_professor', incidentController.getStudentsInFollowUpByProfessor);
 router.get('/students-follow', incidentController.getStudentsInFollowUp);
 router.get('/', incidentController.getAllIncidents);
 router.get('/:id', incidentController.getIncidentById);
 router.get('/course/:courseId', incidentController.getIncidentsByCourse);
+router.get('/history/course/:courseId', incidentController.getIncidentHistoryByCourse);
+
 router.post('/', incidentController.createIncident);
 router.put('/:id', incidentController.updateIncident);
 router.delete('/:id', incidentController.deleteIncident);

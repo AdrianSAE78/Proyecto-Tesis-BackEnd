@@ -25,30 +25,32 @@ exports.getIncidentById = async (req, res) => {
     }
 };
 
-exports.getIncidentByStudentId = async (req, res) => {
+exports.getIncidentsByStudentId = async (req, res) => {
   try {
-    let { id_student } = req.params;
+    const { id } = req.params;
 
-    let incidents = await Incident.findAll({
-      where: { id_student, status: 'pending'},
+    const incidents = await Incident.findAll({
+      where: { id_student: id },
       include: [
-        { model: Student, as: 'student', attributes: ['id_student', 'firstName', 'lastName'] },
-        { model: Professor, as: 'professor', attributes: ['id_professor', 'firstName', 'lastName'] }
+        {
+          model: Student,
+          attributes: ['firstName', 'lastName']
+        },
+        {
+          model: Professor,
+          attributes: ['firstName', 'lastName']
+        }
       ],
       order: [['date', 'DESC']]
- 
     });
-
-    if (!incidents || incidents.length === 0) {
-      return res.status(404).json({ message: 'No se encontraron incidentes para este estudiante' });
-    }
 
     res.status(200).json(incidents);
   } catch (error) {
-    console.error("Error al obtener incidentes por estudiante:", error);
+    console.error("Error al obtener incidentes:", error);
     res.status(500).json({ error: error.message });
   }
 };
+
 
 exports.getIncidentsByCourse = async (req, res) => {
     try {
@@ -117,35 +119,116 @@ exports.deleteIncident = async (req, res) => {
     }
 };
 
+// controller/incidentsController.js
 exports.getStudentsInFollowUp = async (req, res) => {
-    try {
-        let incidents = await Incident.findAll({
-            where: { status: 'pending' },
-            include: [
-                {
-                    model: Student,
-                    as: 'student',
-                    attributes: ['id_student', 'lastName', 'firstName']
-                }
-            ],
-            order: [['date', 'DESC']]
-        });
+  try {
+    const incidents = await Incident.findAll({
+      where: { status: 'pending' },
+      include: [
+        {
+          model: Student, 
+          attributes: ['id_student', 'firstName', 'lastName']
+        }
+      ],
+      order: [['date', 'DESC']]
+    });
 
-        let students = incidents.map(inc => inc.student);
+    const uniqueStudents = [];
+    const seen = new Set();
 
-        let uniqueStudents = [];
-        let seen = new Set();
-
-        students.forEach(student => {
-            if (student && !seen.has(student.id_student)) {
-                seen.add(student.id_student);
-                uniqueStudents.push(student);
-            }
-        });
-
-        res.status(200).json(uniqueStudents);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+    for (const inc of incidents) {
+      const student = inc.Student; // 👈 cambia esto también
+      if (student && !seen.has(student.id_student)) {
+        seen.add(student.id_student);
+        uniqueStudents.push(student);
+      }
     }
+
+    res.status(200).json(uniqueStudents);
+  } catch (error) {
+    console.error("Error al obtener estudiantes en seguimiento:", error);
+    res.status(500).json({ error: error.message });
+  }
 };
+
+exports.getStudentsInFollowUpByProfessor = async (req, res) => {
+  try {
+    const { id_professor } = req.params;
+
+    const incidents = await Incident.findAll({
+      where: {
+        status: 'pending',
+        id_professor: id_professor
+      },
+      include: [
+        {
+          model: Student,
+          attributes: ['id_student', 'firstName', 'lastName']
+        }
+      ],
+      order: [['date', 'DESC']]
+    });
+
+    const uniqueStudents = [];
+    const seen = new Set();
+
+    for (const inc of incidents) {
+      const student = inc.Student;
+      if (student && !seen.has(student.id_student)) {
+        seen.add(student.id_student);
+        uniqueStudents.push(student);
+      }
+    }
+
+    res.status(200).json(uniqueStudents);
+  } catch (error) {
+    console.error("Error al obtener estudiantes en seguimiento:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+exports.getIncidentHistoryByCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const incidents = await Incident.findAll({
+      where: {
+        status: ['pending', 'resolved']
+      },
+      include: [
+        {
+          model: Student,
+          where: { id_course: courseId },
+          attributes: ['id_student', 'firstName', 'lastName']
+        },
+        {
+          model: Professor,
+          attributes: ['firstName', 'lastName']
+        }
+      ],
+      order: [['date', 'DESC']]
+    });
+
+    const grouped = {};
+
+    incidents.forEach((incident) => {
+      const student = incident.Student;
+      if (!grouped[student.id_student]) {
+        grouped[student.id_student] = {
+          student,
+          incidents: []
+        };
+      }
+      grouped[student.id_student].incidents.push(incident);
+    });
+
+    res.status(200).json(Object.values(grouped));
+  } catch (error) {
+    console.error("Error al obtener historial de incidentes por curso:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
