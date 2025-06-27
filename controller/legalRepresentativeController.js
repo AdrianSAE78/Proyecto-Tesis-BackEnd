@@ -79,7 +79,18 @@ exports.createLegalRepresentative = async (req, res) => {
       identification
     );
 
-    res.status(201).json({ representative: newRepresentative, user: newUser });
+    console.log("📤 Enviando al frontend:", {
+      id_legal_representative: newRepresentative.id_legal_representative,
+      representative: newRepresentative,
+      user: newUser
+    });
+
+    res.status(201).json({
+      id_legal_representative: newRepresentative.id_representative, 
+      representative: newRepresentative,
+      user: newUser
+    });
+    
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });

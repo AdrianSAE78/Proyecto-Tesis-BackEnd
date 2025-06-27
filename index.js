@@ -43,7 +43,7 @@ app.use('/api/auth', authRoute); // 👈 Aquí va tu login y (posiblemente) regi
 // -------------------- INICIO DEL SERVIDOR --------------------
 // Sincroniza los modelos con la BD (usa alter para evitar duplicados/conflictos)
 //sequelize.sync({ force: true }) --> Para eliminar todos los datos de mi DB
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync({ alter: true }).then(() => {
     console.log('✅ Base de datos conectada!');
     createDefaultAdmin(); 
     app.listen(PORT, () => {
