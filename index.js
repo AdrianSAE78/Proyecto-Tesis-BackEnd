@@ -16,13 +16,9 @@ const legalRepresentativeRoute = require('./routes/legalRepresentativeRoute');
 const professorRoute = require('./routes/professorRoute');
 const professorCourseRoute = require('./routes/professorCourseRoute');
 const roleRoute = require('./routes/roleRoute');
-<<<<<<< HEAD
 const authRoute = require('./routes/authRoute');
 const newsRoute = require('./routes/newsRoute');
-=======
-const authRoute = require('./routes/authRoute');    // Rutas de login y (posiblemente) registro
 const createDefaultAdmin = require('./controller/createDefaultAdmin');
->>>>>>> 215d27751f496063f8cb344f6ec479fbe9044f6a
 
 // -------------------- CONFIGURACIÓN --------------------
 const app = express();
