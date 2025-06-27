@@ -104,11 +104,7 @@ const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-<<<<<<< HEAD
-    const role = await Role.findOne({ where: { id_role } });
-=======
     const role = await Role.findOne({ where: { role_name } });
->>>>>>> feature/backv3
     if (!role) return res.status(400).json({ message: 'Rol no válido' });
 
     const userPayload = {
