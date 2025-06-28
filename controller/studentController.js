@@ -1,4 +1,4 @@
-const { Student, Course, Professor, LegalRepresentative, ProfessorCourse } = require('../model/tableRelations');
+const { Student, Course, Professor, LegalRepresentative } = require('../model/tableRelations');
 const { Op } = require("sequelize");
 
 exports.getAllStudents = async (req, res) => {
@@ -12,7 +12,6 @@ exports.getAllStudents = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 };
-
 
 exports.getStudentById = async (req, res) => {
     try {
@@ -28,58 +27,56 @@ exports.getStudentById = async (req, res) => {
 };
 
 exports.getStudentsByCourseId = async (req, res) => {
-  try {
-    const { courseId } = req.params;
+    try {
+        const { courseId } = req.params;
 
-    const students = await Student.findAll({
-      where: { id_course: courseId },
-      order: [
-        ['lastName', 'ASC'],
-        ['firstName', 'ASC']
-      ]
-    });
+        const students = await Student.findAll({
+            where: { id_course: courseId },
+            order: [
+                ['lastName', 'ASC'],
+                ['firstName', 'ASC']
+            ]
+        });
 
-    if (!students || students.length === 0) {
-      return res.status(404).json({ message: "No students found for this course." });
+        if (!students || students.length === 0) {
+            return res.status(404).json({ message: "No students found for this course." });
+        }
+
+        res.status(200).json(students);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: error.message });
     }
-
-    res.status(200).json(students);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: error.message });
-  }
 };
-
 
 exports.createStudent = async (req, res) => {
     try {
-      const {
-        firstName,
-        lastName,
-        birthDate,
-        identityCard,
-        status,
-        id_course,
-        id_legal_representative  // ✅ este es el nombre correcto
-      } = req.body;
-  
-      const newStudent = await Student.create({
-        firstName,
-        lastName,
-        birthDate,
-        identityCard,
-        status,
-        id_course,
-        id_legal_representative  // ✅ asegúrate de enviar este en Postman/frontend
-      });
-  
-      res.status(201).json(newStudent);  // ✅ solo una respuesta
+        const {
+            firstName,
+            lastName,
+            birthDate,
+            identityCard,
+            status,
+            id_course,
+            id_legal_representative 
+        } = req.body;
+
+        const newStudent = await Student.create({
+            firstName,
+            lastName,
+            birthDate,
+            identityCard,
+            status,
+            id_course,
+            id_legal_representative 
+        });
+
+        res.status(201).json(newStudent);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: error.message });
+        console.error(error);
+        res.status(500).json({ error: error.message });
     }
-  };
-  
+};
 
 exports.updateStudent = async (req, res) => {
     try {
@@ -87,8 +84,8 @@ exports.updateStudent = async (req, res) => {
         if (!student) {
             return res.status(404).json({ error: 'Student not found' });
         }
-        const { firstName, lastName, birthDate, identityCard, status, id_course, id_representative } = req.body;
-        await student.update({ firstName, lastName, birthDate, identityCard, status, id_course, id_representative });
+        const { firstName, lastName, birthDate, identityCard, status, id_course, id_legal_representative } = req.body;
+        await student.update({ firstName, lastName, birthDate, identityCard, status, id_course, id_legal_representative });
         res.status(200).json(student);
     } catch (error) {
         console.error(error);
@@ -110,38 +107,37 @@ exports.deleteStudent = async (req, res) => {
     }
 };
 
-
 exports.searchStudentsByLastNameAndProfessor = async (req, res) => {
-  const { apellido, id_professor } = req.params;
+    const { apellido, id_professor } = req.params;
 
-  try {
-    const students = await Student.findAll({
-      where: {
-        lastName: { [Op.iLike]: `%${apellido}%` }
-      },
-      include: [
-        {
-          model: Course,
-          required: true,
-          include: [
-            {
-              model: Professor,
-              as: 'professors',
-              where: { id_professor: id_professor },
-              through: { attributes: [] },
-              required: true
-            }
-          ]
-        },
-        {
-          model: LegalRepresentative
-        }
-      ]
-    });
+    try {
+        const students = await Student.findAll({
+            where: {
+                lastName: { [Op.iLike]: `%${apellido}%` }
+            },
+            include: [
+                {
+                    model: Course,
+                    required: true,
+                    include: [
+                        {
+                            model: Professor,
+                            as: 'professors',
+                            where: { id_professor },
+                            through: { attributes: [] },
+                            required: true
+                        }
+                    ]
+                },
+                {
+                    model: LegalRepresentative
+                }
+            ]
+        });
 
-    res.status(200).json(students);
-  } catch (error) {
-    console.error("Error al buscar estudiantes:", error);
-    res.status(500).json({ message: "Error al buscar estudiantes", error });
-  }
+        res.status(200).json(students);
+    } catch (error) {
+        console.error("Error al buscar estudiantes:", error);
+        res.status(500).json({ message: "Error al buscar estudiantes", error });
+    }
 };

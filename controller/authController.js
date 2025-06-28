@@ -2,14 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const User = require('../model/userModel');
-const Role = require('../model/roleModel');
-
-const { Professor } = require('../model/tableRelations');
-const Administrative = require('../model/administrativeModel');
-const ProfessorModel = require('../model/professorModel');
-const LegalRepresentative = require('../model/legalRepresentativeModel');
-
+const { User, Role, Administrative, Professor, LegalRepresentative } = require('../model/tableRelations');
 const SECRET_KEY = process.env.SECRET_KEY;
 
 // LOGIN
@@ -38,7 +31,7 @@ const login = async (req, res) => {
 
     switch (user.role.role_name) {
       case 'administrative':
-        const admin = await Administrative.findByPk(user.id_administrative);
+        const admin = await Administrative.findOne({ where: { id_user: user.id_user } });
         if (admin) {
           roleId = admin.id_administrative;
           firstName = admin.firstName;
@@ -47,7 +40,7 @@ const login = async (req, res) => {
         }
         break;
       case 'professor':
-        const prof = await Professor.findByPk(user.id_professor);
+        const prof = await Professor.findOne({ where: { id_user: user.id_user } });
         if (prof) {
           roleId = prof.id_professor;
           firstName = prof.firstName;
@@ -55,8 +48,8 @@ const login = async (req, res) => {
           email = prof.email;
         }
         break;
-      case 'legalRepresentative':
-        const parent = await LegalRepresentative.findByPk(user.id_representative);
+      case 'legal_representative':
+        const parent = await LegalRepresentative.findOne({ where: { id_user: user.id_user } });
         if (parent) {
           roleId = parent.id_representative;
           firstName = parent.firstName;
@@ -85,7 +78,7 @@ const login = async (req, res) => {
   }
 };
 
-// REGISTER (usando role_name en lugar de id_role)
+// REGISTER
 const register = async (req, res) => {
   const {
     user_name,
@@ -111,26 +104,34 @@ const register = async (req, res) => {
       user_name,
       password: hashedPassword,
       id_role: role.id_role,
-      id_administrative: null,
-      id_professor: null,
-      id_representative: null
     };
 
+    let newUser;
     switch (role.role_name) {
       case 'administrative':
-        userPayload.id_administrative = id_administrative;
+        newUser = await User.create(userPayload);
+        const admin = await Administrative.create({
+          id_user: newUser.id_user,
+          id_administrative,
+        });
         break;
       case 'professor':
-        userPayload.id_professor = id_professor;
+        newUser = await User.create(userPayload);
+        const professor = await Professor.create({
+          id_user: newUser.id_user,
+          id_professor,
+        });
         break;
       case 'legalRepresentative':
-        userPayload.id_representative = id_representative;
+        newUser = await User.create(userPayload);
+        const representative = await LegalRepresentative.create({
+          id_user: newUser.id_user,
+          id_representative,
+        });
         break;
       default:
         return res.status(400).json({ message: 'Rol no reconocido' });
     }
-
-    const newUser = await User.create(userPayload);
 
     return res.status(201).json({
       message: 'Usuario registrado exitosamente',
@@ -166,8 +167,7 @@ const registerAndLoginAdmin = async (req, res) => {
     const newUser = await User.create({
       user_name: userName,
       password: hashedPassword,
-      id_role: role.id_role,
-      id_administrative: newAdmin.id_administrative
+      id_role: role.id_role
     });
 
     // 3. Asociar id_user al administrativo
@@ -200,6 +200,4 @@ const registerAndLoginAdmin = async (req, res) => {
   }
 };
 
-
 module.exports = { login, register, registerAndLoginAdmin };
-

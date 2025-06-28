@@ -30,22 +30,6 @@ const Incident = sequelize.define('Incident', {
         allowNull:true,
         defaultValue:null
     },
-    id_student: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'students',
-            key: 'id_student'
-        }
-    },
-    id_professor: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        references: {
-            model: 'professors',
-            key: 'id_professor'
-        }
-    }
 }, {
     tableName: 'incidents',
 });

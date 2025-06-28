@@ -1,11 +1,17 @@
 const bcrypt = require('bcrypt');
-const Professor = require('../model/professorModel');
-const User = require('../model/userModel');
+const { Professor, User } = require('../model/tableRelations');
 const { sendCredentialsEmail } = require('../services/emailService');
 
 exports.getAllProfessors = async (req, res) => {
   try {
-    const professors = await Professor.findAll();
+    const professors = await Professor.findAll({
+      include: [
+        {
+          model: User,  // Incluir User sin alias
+          attributes: ['user_name']  // Si necesitas los datos del usuario
+        }
+      ]
+    });
     res.status(200).json(professors);
   } catch (error) {
     console.error(error);
@@ -15,7 +21,14 @@ exports.getAllProfessors = async (req, res) => {
 
 exports.getProfessorById = async (req, res) => {
   try {
-    const professor = await Professor.findByPk(req.params.id);
+    const professor = await Professor.findByPk(req.params.id, {
+      include: [
+        {
+          model: User,  // Incluir User sin alias
+          attributes: ['user_name']  // Si necesitas los datos del usuario
+        }
+      ]
+    });
     if (!professor) {
       return res.status(404).json({ error: 'Profesor no encontrado' });
     }
@@ -39,7 +52,7 @@ exports.createProfessor = async (req, res) => {
       phone
     });
 
-    // 2. Preparar datos para usuario
+    // 2. Preparar datos para el usuario
     const userName = email.split('@')[0];  // Ej: "victor.umatambo"
     const roleId = 2; // ID del rol 'professor'
     const hashedPassword = await bcrypt.hash(identification, 10); // Contraseña hasheada
@@ -49,10 +62,12 @@ exports.createProfessor = async (req, res) => {
       user_name: userName,
       password: hashedPassword,
       id_role: roleId,
-      id_professor: newProfessor.id
     });
 
-    // 4. Enviar correo con credenciales
+    // 4. Relacionar el User con el Professor (Actualizar el id_user en el profesor)
+    await newProfessor.update({ id_user: newUser.id_user });
+
+    // 5. Enviar correo con credenciales
     await sendCredentialsEmail(
       email,
       `${firstName} ${lastName}`,
@@ -76,6 +91,16 @@ exports.updateProfessor = async (req, res) => {
 
     const { firstName, lastName, identification, email, phone } = req.body;
     await professor.update({ firstName, lastName, identification, email, phone });
+
+    // 6. Actualizar los datos del usuario asociado
+    const user = await User.findByPk(professor.id_user);
+    if (user) {
+      await user.update({
+        user_name: email.split('@')[0], // Actualiza el nombre de usuario (por ejemplo, con el email)
+        password: user.password, // Mantener la misma contraseña
+      });
+    }
+
     res.status(200).json(professor);
   } catch (error) {
     console.error(error);

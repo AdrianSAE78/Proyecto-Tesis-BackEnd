@@ -2,8 +2,6 @@ const bcrypt = require('bcrypt');
 const jwt = require("jsonwebtoken");
 const QRCode = require("qrcode");
 
-const LegalRepresentative = require("../model/legalRepresentativeModel");
-const User = require('../model/userModel');
 const { sendCredentialsEmail } = require("../services/emailService");
 
 const {
@@ -11,6 +9,8 @@ const {
   Asistance,
   Incident,
   Professor,
+  LegalRepresentative,
+  User
 } = require("../model/tableRelations");
 
 exports.getAllLegalRepresentatives = async (req, res) => {
@@ -68,10 +68,12 @@ exports.createLegalRepresentative = async (req, res) => {
       user_name: userName,
       password: hashedPassword,
       id_role: roleId,
-      id_representative: newRepresentative.id
     });
 
-    // 4. Enviar correo con credenciales
+    // 4. Asociar el representante legal con el usuario (usando id_user)
+    await newRepresentative.update({ id_user: newUser.id_user });
+
+    // 5. Enviar correo con credenciales
     await sendCredentialsEmail(
       email,
       `${firstName} ${lastName}`,
@@ -80,7 +82,7 @@ exports.createLegalRepresentative = async (req, res) => {
     );
 
     console.log("📤 Enviando al frontend:", {
-      id_legal_representative: newRepresentative.id_legal_representative,
+      id_legal_representative: newRepresentative.id_representative,
       representative: newRepresentative,
       user: newUser
     });
@@ -114,6 +116,16 @@ exports.updateLegalRepresentative = async (req, res) => {
       email,
       address,
     });
+
+    // 6. Actualizar los datos del usuario asociado
+    const user = await User.findByPk(representative.id_user);
+    if (user) {
+      await user.update({
+        user_name: email.split('@')[0], // Actualiza el nombre de usuario (por ejemplo, con el email)
+        password: user.password, // Mantener la misma contraseña
+      });
+    }
+
     res.status(200).json(representative);
   } catch (error) {
     console.error(error);
@@ -153,7 +165,7 @@ exports.getStudentsByRepresentative = async (req, res) => {
 
     const students = await Student.findAll({
       where: { id_legal_representative: id },
-      raw: false,
+      raw: false, // Esto asegura que las instancias completas sean devueltas
     });
 
     const formattedStudents = students.map((student) => ({

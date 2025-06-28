@@ -1,4 +1,4 @@
-const Role = require('../model/roleModel');
+const { Role } = require('../model/tableRelations');
 
 const roleController = {
   getAllRoles: async (req, res) => {

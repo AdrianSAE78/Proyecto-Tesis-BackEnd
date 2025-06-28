@@ -9,6 +9,7 @@ const Professor = require('./professorModel');
 const ProfessorCourse = require('./professorCourseModel');
 const Student = require('./studentModel');
 const User = require('./userModel');
+const Role = require('./roleModel');
 
 // LegalRepresentative ↔ Student (1:N)
 LegalRepresentative.hasMany(Student, { foreignKey: 'id_legal_representative' });
@@ -33,7 +34,7 @@ Course.belongsToMany(Professor, {
   as: 'professors'
 });
 
-//Relaciones directas para hacer include desde ProfessorCourse
+// Relaciones directas para hacer include desde ProfessorCourse
 ProfessorCourse.belongsTo(Professor, { foreignKey: 'id_professor', as: 'professor' });
 ProfessorCourse.belongsTo(Course, { foreignKey: 'id_course', as: 'course' });
 
@@ -61,6 +62,10 @@ User.hasOne(Administrative, { foreignKey: 'id_user' });
 Professor.belongsTo(User, { foreignKey: 'id_user' });
 User.hasOne(Professor, { foreignKey: 'id_user' });
 
+// User ↔ Legal Representative (1:1)
+LegalRepresentative.belongsTo(User, { foreignKey: 'id_user' });
+User.hasOne(LegalRepresentative, { foreignKey: 'id_user' });
+
 // Relaciones Asistance
 Asistance.belongsTo(Student, { foreignKey: 'id_student', as: 'asistedStudent' });
 Asistance.belongsTo(Professor, { foreignKey: 'id_professor', as: 'asistanceProfessor' });
@@ -69,7 +74,8 @@ Asistance.belongsTo(Professor, { foreignKey: 'id_professor', as: 'asistanceProfe
 Incident.belongsTo(Student, { foreignKey: 'id_student' });
 Incident.belongsTo(Professor, { foreignKey: 'id_professor' });
 
-// Exportar modelos
+// Asociación: User pertenece a un Role
+User.belongsTo(Role, { foreignKey: 'id_role', as: 'role' });
 
 module.exports = { 
   Administrative,
@@ -80,5 +86,6 @@ module.exports = {
   Asistance,
   Incident,
   User,
-  ProfessorCourse
+  ProfessorCourse,
+  Role
 };

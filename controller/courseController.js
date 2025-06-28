@@ -1,5 +1,4 @@
-const { Professor, Course } = require('../model/tableRelations');
-const ProfessorCourse = require('../model/professorCourseModel');
+const { Professor, Course, ProfessorCourse } = require('../model/tableRelations');
 
 exports.getAllCourses = async (req, res) => {
     try {
@@ -31,7 +30,7 @@ exports.getCoursesByProfessor = async (req, res) => {
     const professor = await Professor.findByPk(id, {
       include: {
         model: Course,
-        as: 'courses', // Debe coincidir con el alias en la relación N:M
+        as: 'courses',
         through: { attributes: [] }
       }
     });

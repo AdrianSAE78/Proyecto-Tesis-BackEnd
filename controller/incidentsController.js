@@ -1,6 +1,5 @@
-const Incident = require('../model/incidentsModel');
-const Student = require('../model/studentModel');
-const Professor = require('../model/professorModel');
+const { Incident, Student, Professor } = require('../model/tableRelations');
+const { Op } = require("sequelize");
 
 exports.getAllIncidents = async (req, res) => {
     try {
@@ -34,11 +33,13 @@ exports.getIncidentsByStudentId = async (req, res) => {
       include: [
         {
           model: Student,
-          attributes: ['firstName', 'lastName']
+          attributes: ['firstName', 'lastName'],
+          include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
         },
         {
           model: Professor,
-          attributes: ['firstName', 'lastName']
+          attributes: ['firstName', 'lastName'],
+          include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
         }
       ],
       order: [['date', 'DESC']]
@@ -51,7 +52,6 @@ exports.getIncidentsByStudentId = async (req, res) => {
   }
 };
 
-
 exports.getIncidentsByCourse = async (req, res) => {
     try {
         let { courseId } = req.params;
@@ -62,7 +62,8 @@ exports.getIncidentsByCourse = async (req, res) => {
                     model: Student,
                     as: 'student',
                     where: { id_course: courseId },
-                    attributes: ['firstName', 'lastName']
+                    attributes: ['firstName', 'lastName'],
+                    include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
                 }
             ],
             order: [['date', 'DESC']]
@@ -74,7 +75,6 @@ exports.getIncidentsByCourse = async (req, res) => {
     }
 };
 
-
 exports.createIncident = async (req, res) => {
   try {
     let { type, description, resolution, id_student, id_professor } = req.body;
@@ -82,7 +82,7 @@ exports.createIncident = async (req, res) => {
     if (!id_student || !id_professor) {
       return res.status(400).json({ error: "Id necesario" });
     }
-    let newIncident = await Incident.create({type, description, resolution:null, id_student, id_professor,});
+    let newIncident = await Incident.create({type, description, resolution: null, id_student, id_professor});
     res.status(201).json(newIncident);
   } catch (error) {
     console.error(error);
@@ -96,7 +96,7 @@ exports.updateIncident = async (req, res) => {
         if (!incident) {
             return res.status(404).json({ error: 'Incidente no encontrado' });
         }
-        let { studentId, professorId, type, description,resolution, date, status } = req.body;
+        let { studentId, professorId, type, description, resolution, date, status } = req.body;
         await incident.update({ studentId, professorId, type, description, resolution, date, status });
         res.status(200).json(incident);
     } catch (error) {
@@ -119,7 +119,6 @@ exports.deleteIncident = async (req, res) => {
     }
 };
 
-// controller/incidentsController.js
 exports.getStudentsInFollowUp = async (req, res) => {
   try {
     const incidents = await Incident.findAll({
@@ -137,7 +136,7 @@ exports.getStudentsInFollowUp = async (req, res) => {
     const seen = new Set();
 
     for (const inc of incidents) {
-      const student = inc.Student; // 👈 cambia esto también
+      const student = inc.Student; 
       if (student && !seen.has(student.id_student)) {
         seen.add(student.id_student);
         uniqueStudents.push(student);
@@ -151,6 +150,7 @@ exports.getStudentsInFollowUp = async (req, res) => {
   }
 };
 
+// Obtener estudiantes en seguimiento
 exports.getStudentsInFollowUpByProfessor = async (req, res) => {
   try {
     const { id_professor } = req.params;
@@ -163,7 +163,7 @@ exports.getStudentsInFollowUpByProfessor = async (req, res) => {
       include: [
         {
           model: Student,
-          attributes: ['id_student', 'firstName', 'lastName']
+          attributes: ['id_student', 'firstName', 'lastName'],
         }
       ],
       order: [['date', 'DESC']]
@@ -173,7 +173,7 @@ exports.getStudentsInFollowUpByProfessor = async (req, res) => {
     const seen = new Set();
 
     for (const inc of incidents) {
-      const student = inc.Student;
+      const student = inc.Student; // Accede a la propiedad directamente
       if (student && !seen.has(student.id_student)) {
         seen.add(student.id_student);
         uniqueStudents.push(student);
@@ -186,6 +186,7 @@ exports.getStudentsInFollowUpByProfessor = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
 
 
 exports.getIncidentHistoryByCourse = async (req, res) => {
@@ -200,11 +201,13 @@ exports.getIncidentHistoryByCourse = async (req, res) => {
         {
           model: Student,
           where: { id_course: courseId },
-          attributes: ['id_student', 'firstName', 'lastName']
+          attributes: ['id_student', 'firstName', 'lastName'],
+          include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
         },
         {
           model: Professor,
-          attributes: ['firstName', 'lastName']
+          attributes: ['firstName', 'lastName'],
+          include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
         }
       ],
       order: [['date', 'DESC']]
@@ -229,6 +232,3 @@ exports.getIncidentHistoryByCourse = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
-
-

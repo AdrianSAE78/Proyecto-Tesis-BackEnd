@@ -1,6 +1,5 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
-const LegalRepresentative = require('./legalRepresentativeModel'); // Asegúrate de importar
 
 const Student = sequelize.define('Student', {
   id_student: {
@@ -33,14 +32,6 @@ const Student = sequelize.define('Student', {
     allowNull: false,
     defaultValue: 'active'
   },
-  id_legal_representative: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'legal_representatives',
-      key: 'id_representative'
-    }
-  },
   id_course: {
     type: DataTypes.INTEGER,
     allowNull: false,
@@ -52,13 +43,6 @@ const Student = sequelize.define('Student', {
 }, {
   tableName: 'students',
   timestamps: false
-});
-
-// 🔗 Asociación con LegalRepresentative
-Student.belongsTo(LegalRepresentative, {
-  foreignKey: 'id_legal_representative',
-  targetKey: 'id_representative',
-  onDelete: 'CASCADE'
 });
 
 module.exports = Student;

@@ -1,12 +1,14 @@
-const ProfessorCourse = require('../model/professorCourseModel');
-const { Professor, Course } = require('../model/tableRelations');
+const { ProfessorCourse, Professor, Course, User } = require('../model/tableRelations');
 
 // Obtener todas las asignaciones
 exports.getAllAssignments = async (req, res) => {
   try {
     const assignments = await ProfessorCourse.findAll({
       include: [
-        { model: Professor, as: 'professor' },
+        {
+          model: Professor,
+          include: { model: User, attributes: ['user_name'] } // Incluir User sin alias
+        },
         { model: Course, as: 'course' }
       ]
     });
@@ -21,10 +23,15 @@ exports.getAllAssignments = async (req, res) => {
 exports.getAssignmentsByProfessorId = async (req, res) => {
   try {
     const { id_professor } = req.params;
+
     const assignments = await ProfessorCourse.findAll({
       where: { id_professor },
       include: [
-        { model: Professor, as: 'professor' },
+        {
+          model: Professor,
+          as: 'professor',
+          include: { model: User, attributes: ['user_name'] }
+        },
         { model: Course, as: 'course' }
       ]
     });
@@ -40,11 +47,19 @@ exports.getAssignmentsByProfessorId = async (req, res) => {
   }
 };
 
+
 // Asignar curso a profesor
 exports.assignCourseToProfessor = async (req, res) => {
   try {
     const { id_professor, id_course } = req.body;
 
+    // Verificar si el profesor existe
+    const professor = await Professor.findByPk(id_professor);
+    if (!professor) {
+      return res.status(404).json({ message: 'Profesor no encontrado' });
+    }
+
+    // Crear la asignación del curso al profesor
     const newAssignment = await ProfessorCourse.create({ id_professor, id_course });
 
     res.status(201).json({ message: 'Curso asignado correctamente', data: newAssignment });

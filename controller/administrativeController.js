@@ -1,9 +1,7 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const Administrative = require('../model/administrativeModel');
-const User = require('../model/userModel');
+const { Administrative, User, Student } = require('../model/tableRelations');
 const { sendCredentialsEmail } = require('../services/emailService');
-const Student = require('../model/studentModel'); // para validateQRToken
 
 exports.getAllAdministratives = async (req, res) => {
   try {
@@ -51,10 +49,12 @@ exports.createAdministrative = async (req, res) => {
       user_name: userName,
       password: hashedPassword,
       id_role: roleId,
-      id_administrative: newAdministrative.id
     });
 
-    // 4. Enviar correo con credenciales
+    // 4. Asociar el administrativo con el usuario
+    await newAdministrative.update({ id_user: newUser.id_user });
+
+    // 5. Enviar correo con credenciales
     await sendCredentialsEmail(
       email,
       `${firstName} ${lastName}`,
@@ -78,6 +78,16 @@ exports.updateAdministrative = async (req, res) => {
 
     const { firstName, lastName, identification, email, phone } = req.body;
     await administrative.update({ firstName, lastName, identification, email, phone });
+
+    // 6. Actualizar los datos del usuario asociado
+    const user = await User.findByPk(administrative.id_user);
+    if (user) {
+      await user.update({
+        user_name: email.split('@')[0], // Actualiza el nombre de usuario (por ejemplo, con el email)
+        password: user.password, // Mantener la misma contraseña
+      });
+    }
+
     res.status(200).json(administrative);
   } catch (error) {
     console.error(error);

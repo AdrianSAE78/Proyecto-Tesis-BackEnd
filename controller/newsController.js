@@ -1,4 +1,4 @@
-const News = require('../model/newsModel');
+const { News } = require('../model/tableRelations');
 const { Op } = require('sequelize');
 
 exports.createNews = async (req, res) => {
@@ -57,7 +57,7 @@ exports.createNews = async (req, res) => {
             error: error.message
         });
     }
-}
+};
 
 exports.getAllNews = async (req, res) => {
     try {
@@ -106,7 +106,7 @@ exports.getAllNews = async (req, res) => {
             error: error.message
         });
     }
-}
+};
 
 exports.getActiveNewsByRole = async (req, res) => {
     try {
@@ -146,7 +146,7 @@ exports.getActiveNewsByRole = async (req, res) => {
             error: error.message
         });
     }
-}
+};
 
 exports.getNewsById = async (req, res) => {
     try {
@@ -174,7 +174,7 @@ exports.getNewsById = async (req, res) => {
             error: error.message
         });
     }
-}
+};
 
 exports.updateNews = async (req, res) => {
     try {
@@ -217,7 +217,7 @@ exports.updateNews = async (req, res) => {
             error: error.message
         });
     }
-}
+};
 
 exports.DeleteNews = async (req, res) => {
     try {
@@ -246,4 +246,4 @@ exports.DeleteNews = async (req, res) => {
             error: error.message
         });
     }
-}
+};

@@ -1,7 +1,5 @@
 const bcrypt = require('bcrypt');
-const User = require('../model/userModel');
-const Role = require('../model/roleModel');
-const Administrative = require('../model/administrativeModel');
+const { User, Role, Administrative } = require('../model/tableRelations');
 
 async function createDefaultAdmin() {
   try {
@@ -28,12 +26,14 @@ async function createDefaultAdmin() {
 
     // 4. Crear usuario admin con id_role = 1 directamente
     const hashedPassword = await bcrypt.hash('12345678', 10);
-    await User.create({
+    const newUser = await User.create({
       user_name: 'admin',
       password: hashedPassword,
-      id_administrative: administrative.id_administrative,
-      id_role: 1
+      id_role: 1,
     });
+
+    // 5. Asociar el usuario con el administrativo
+    await administrative.update({ id_user: newUser.id_user });
 
     console.log('🎉 Usuario admin creado exitosamente');
   } catch (error) {

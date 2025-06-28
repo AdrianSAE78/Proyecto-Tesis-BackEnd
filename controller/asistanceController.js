@@ -1,9 +1,6 @@
-const { Op } = require('sequelize');
+const { Asistance, Student } = require('../model/tableRelations');
+const { Op } = require("sequelize");
 const moment = require('moment');
-const Asistance = require('../model/asistanceModel');
-const Student = require('../model/studentModel');
-
-
 
 exports.getAllAsistances = async (req, res) => {
     try {
@@ -90,7 +87,7 @@ exports.createAsistance = async (req, res) => {
 
     const nuevaAsistencia = await Asistance.create({
       id_student,
-      id_professor,
+      id_professor: id_professor,
       id_course,
       status,
       justification,
@@ -153,7 +150,6 @@ exports.deleteAsistance = async (req, res) => {
     }
 };
 
-
 exports.getAsistancesByCourseAndStatus = async (req, res) => {
     try {
         const courseId = req.params.courseId;
@@ -181,7 +177,6 @@ exports.getAsistancesByCourseAndStatus = async (req, res) => {
         });
     }
 };
-
 
 exports.getInasistenciasByProfessorCourse = async (req, res) => {
   try {
@@ -215,7 +210,7 @@ exports.getAtrazosByProfessorCourse = async (req, res) => {
       where: {
         id_professor: id_professor,
         id_course: id_course,
-        status: 'late' // 🔁 Cambiado a 'late'
+        status: 'late'
       },
       include: [
         {

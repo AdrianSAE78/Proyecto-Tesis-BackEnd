@@ -7,31 +7,6 @@ const Asistance = sequelize.define('Asistance', {
         primaryKey: true,
         autoIncrement: true
     },
-    id_student: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'students',
-            key: 'id_student'
-        }
-    },
-    id_professor: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references: {
-            model: 'professors',
-            key: 'id_professor'
-        }
-    },
-    id_course: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        references:{
-            model:'courses',
-            key: 'id_course'
-        }
-    },
-
     date: { 
         type: DataTypes.DATE,
         allowNull: false,

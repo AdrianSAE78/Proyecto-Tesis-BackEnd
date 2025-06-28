@@ -7,22 +7,6 @@ const ProfessorCourse = sequelize.define('ProfessorCourse', {
     primaryKey: true,
     autoIncrement: true
   },
-  id_professor: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'professors',
-      key: 'id_professor'
-    }
-  },
-  id_course: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: 'courses',
-      key: 'id_course'
-    }
-  }
 }, {
   tableName: 'professor_courses',
   timestamps: false
