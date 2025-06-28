@@ -10,6 +10,7 @@ const ProfessorCourse = require('./professorCourseModel');
 const Student = require('./studentModel');
 const User = require('./userModel');
 const Role = require('./roleModel');
+const Guard = require('./guardModel');
 
 // LegalRepresentative ↔ Student (1:N)
 LegalRepresentative.hasMany(Student, { foreignKey: 'id_legal_representative' });
@@ -66,6 +67,10 @@ User.hasOne(Professor, { foreignKey: 'id_user' });
 LegalRepresentative.belongsTo(User, { foreignKey: 'id_user' });
 User.hasOne(LegalRepresentative, { foreignKey: 'id_user' });
 
+// User ↔ Guard (1:1)
+Guard.belongsTo(User, { foreignKey: 'id_user' });
+User.hasOne(Guard, { foreignKey: 'id_user' });
+
 // Relaciones Asistance
 Asistance.belongsTo(Student, { foreignKey: 'id_student', as: 'asistedStudent' });
 Asistance.belongsTo(Professor, { foreignKey: 'id_professor', as: 'asistanceProfessor' });
@@ -87,5 +92,6 @@ module.exports = {
   Incident,
   User,
   ProfessorCourse,
-  Role
+  Role,
+  Guard
 };
