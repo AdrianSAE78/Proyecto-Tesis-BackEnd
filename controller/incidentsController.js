@@ -1,50 +1,49 @@
-const { Incident, Student, Professor } = require('../model/tableRelations');
+// CONTROLLER: incidentsController.js
+const { Incident, Student, Professor, User } = require('../model/tableRelations');
 const { Op } = require("sequelize");
 
 exports.getAllIncidents = async (req, res) => {
-    try {
-        let incidents = await Incident.findAll();
-        res.status(200).json(incidents);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
-    }
+  try {
+    const incidents = await Incident.findAll();
+    res.status(200).json(incidents);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 exports.getIncidentById = async (req, res) => {
-    try {
-        let incident = await Incident.findByPk(req.params.id);
-        if (!incident) {
-            return res.status(404).json({ error: 'Incidente no encontrado' });
-        }
-        res.status(200).json(incident);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+  try {
+    const incident = await Incident.findByPk(req.params.id);
+    if (!incident) {
+      return res.status(404).json({ error: 'Incidente no encontrado' });
     }
+    res.status(200).json(incident);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 exports.getIncidentsByStudentId = async (req, res) => {
   try {
     const { id } = req.params;
-
     const incidents = await Incident.findAll({
       where: { id_student: id },
       include: [
         {
           model: Student,
           attributes: ['firstName', 'lastName'],
-          include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
+          include: { model: User, as: 'user', attributes: ['user_name'] }
         },
         {
           model: Professor,
           attributes: ['firstName', 'lastName'],
-          include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
+          include: { model: User, as: 'user', attributes: ['user_name'] }
         }
       ],
       order: [['date', 'DESC']]
     });
-
     res.status(200).json(incidents);
   } catch (error) {
     console.error("Error al obtener incidentes:", error);
@@ -53,36 +52,41 @@ exports.getIncidentsByStudentId = async (req, res) => {
 };
 
 exports.getIncidentsByCourse = async (req, res) => {
-    try {
-        let { courseId } = req.params;
-
-        let incidents = await Incident.findAll({
-            include: [
-                {
-                    model: Student,
-                    as: 'student',
-                    where: { id_course: courseId },
-                    attributes: ['firstName', 'lastName'],
-                    include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
-                }
-            ],
-            order: [['date', 'DESC']]
-        });
-
-        res.status(200).json(incidents);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener incidentes", error: error.message });
-    }
+  try {
+    const { courseId } = req.params;
+    const incidents = await Incident.findAll({
+      include: [
+        {
+          model: Student,
+          where: { id_course: courseId },
+          attributes: ['firstName', 'lastName'],
+          include: { model: User, as: 'user', attributes: ['user_name'] }
+        }
+      ],
+      order: [['date', 'DESC']]
+    });
+    res.status(200).json(incidents);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener incidentes", error: error.message });
+  }
 };
 
 exports.createIncident = async (req, res) => {
   try {
-    let { type, description, resolution, id_student, id_professor } = req.body;
+    const { type, description, id_student, id_professor } = req.body;
 
-    if (!id_student || !id_professor) {
-      return res.status(400).json({ error: "Id necesario" });
+    if (!id_student || !id_professor || !type || !description) {
+      return res.status(400).json({ error: "Datos requeridos incompletos" });
     }
-    let newIncident = await Incident.create({type, description, resolution: null, id_student, id_professor});
+
+    const newIncident = await Incident.create({
+      type,
+      description,
+      resolution: null,
+      id_student,
+      id_professor
+    });
+
     res.status(201).json(newIncident);
   } catch (error) {
     console.error(error);
@@ -91,32 +95,34 @@ exports.createIncident = async (req, res) => {
 };
 
 exports.updateIncident = async (req, res) => {
-    try {
-        let incident = await Incident.findByPk(req.params.id);
-        if (!incident) {
-            return res.status(404).json({ error: 'Incidente no encontrado' });
-        }
-        let { studentId, professorId, type, description, resolution, date, status } = req.body;
-        await incident.update({ studentId, professorId, type, description, resolution, date, status });
-        res.status(200).json(incident);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+  try {
+    const incident = await Incident.findByPk(req.params.id);
+    if (!incident) {
+      return res.status(404).json({ error: 'Incidente no encontrado' });
     }
+
+    const { type, description, resolution, date, status } = req.body;
+    await incident.update({ type, description, resolution, date, status });
+
+    res.status(200).json(incident);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 exports.deleteIncident = async (req, res) => {
-    try {
-        let incident = await Incident.findByPk(req.params.id);
-        if (!incident) {
-            return res.status(404).json({ error: 'Incidente no encontrado' });
-        }
-        await incident.destroy();
-        res.status(200).json({ message: 'Incidente eliminado correctamente' });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: error.message });
+  try {
+    const incident = await Incident.findByPk(req.params.id);
+    if (!incident) {
+      return res.status(404).json({ error: 'Incidente no encontrado' });
     }
+    await incident.destroy();
+    res.status(200).json({ message: 'Incidente eliminado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 };
 
 exports.getStudentsInFollowUp = async (req, res) => {
@@ -125,7 +131,7 @@ exports.getStudentsInFollowUp = async (req, res) => {
       where: { status: 'pending' },
       include: [
         {
-          model: Student, 
+          model: Student,
           attributes: ['id_student', 'firstName', 'lastName']
         }
       ],
@@ -136,7 +142,7 @@ exports.getStudentsInFollowUp = async (req, res) => {
     const seen = new Set();
 
     for (const inc of incidents) {
-      const student = inc.Student; 
+      const student = inc.Student;
       if (student && !seen.has(student.id_student)) {
         seen.add(student.id_student);
         uniqueStudents.push(student);
@@ -150,7 +156,6 @@ exports.getStudentsInFollowUp = async (req, res) => {
   }
 };
 
-// Obtener estudiantes en seguimiento
 exports.getStudentsInFollowUpByProfessor = async (req, res) => {
   try {
     const { id_professor } = req.params;
@@ -163,7 +168,7 @@ exports.getStudentsInFollowUpByProfessor = async (req, res) => {
       include: [
         {
           model: Student,
-          attributes: ['id_student', 'firstName', 'lastName'],
+          attributes: ['id_student', 'firstName', 'lastName']
         }
       ],
       order: [['date', 'DESC']]
@@ -173,7 +178,7 @@ exports.getStudentsInFollowUpByProfessor = async (req, res) => {
     const seen = new Set();
 
     for (const inc of incidents) {
-      const student = inc.Student; // Accede a la propiedad directamente
+      const student = inc.Student;
       if (student && !seen.has(student.id_student)) {
         seen.add(student.id_student);
         uniqueStudents.push(student);
@@ -187,12 +192,9 @@ exports.getStudentsInFollowUpByProfessor = async (req, res) => {
   }
 };
 
-
-
 exports.getIncidentHistoryByCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
-
     const incidents = await Incident.findAll({
       where: {
         status: ['pending', 'resolved']
@@ -202,12 +204,12 @@ exports.getIncidentHistoryByCourse = async (req, res) => {
           model: Student,
           where: { id_course: courseId },
           attributes: ['id_student', 'firstName', 'lastName'],
-          include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
+          include: { model: User, as: 'user', attributes: ['user_name'] }
         },
         {
           model: Professor,
           attributes: ['firstName', 'lastName'],
-          include: { model: User, as: 'user', attributes: ['user_name'] } // Relacionar con User
+          include: { model: User, as: 'user', attributes: ['user_name'] }
         }
       ],
       order: [['date', 'DESC']]
