@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-const { User, Role, Administrative, Professor, LegalRepresentative } = require('../model/tableRelations');
+const { User, Role, Administrative, Professor, LegalRepresentative, Guard } = require('../model/tableRelations');
 const SECRET_KEY = process.env.SECRET_KEY;
 
 // LOGIN
@@ -57,6 +57,14 @@ const login = async (req, res) => {
           email = parent.email;
         }
         break;
+      case 'guard':
+        const guard = await Guard.findOne({ where: { id_user: user.id_user } });
+        if (guard) {
+          roleId = guard.id_guard;
+          firstName = guard.firstName;
+          lastName = guard.lastName;
+          email = guard.email;
+        }
     }
 
     const tokenPayload = {
@@ -122,11 +130,18 @@ const register = async (req, res) => {
           id_professor,
         });
         break;
-      case 'legalRepresentative':
+      case 'legal_representative':
         newUser = await User.create(userPayload);
         const representative = await LegalRepresentative.create({
           id_user: newUser.id_user,
           id_representative,
+        });
+        break;
+      case 'guard':
+        newUser = await User.create(userPayload);
+        const guard = await Guard.create({
+          id_user: newUser.id_user,
+          id_guard,
         });
         break;
       default:

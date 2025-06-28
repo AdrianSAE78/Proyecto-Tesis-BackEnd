@@ -3,7 +3,7 @@ const { User, Role, Administrative, Professor, LegalRepresentative } = require('
 require('dotenv').config();
 
 const register = async (req, res) => {
-  const { user_name, password, role_name, id_administrative, id_professor, id_representative } = req.body;
+  const { user_name, password, role_name, id_administrative, id_professor, id_representative, id_guard } = req.body;
   
   try {
     // Verificar si el nombre de usuario ya existe
@@ -42,8 +42,12 @@ const register = async (req, res) => {
         id_user: newUser.id_user,
         id_representative,
       });
+    } else if (role_name === 'guard') {
+      await Guard.create({
+        id_user: newUser.id_user,
+        id_guard,
+      });
     }
-
     return res.status(201).json({ message: 'Usuario registrado exitosamente', user: newUser });
 
   } catch (error) {
