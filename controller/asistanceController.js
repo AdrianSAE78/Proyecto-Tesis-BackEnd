@@ -3,45 +3,24 @@ const { Op } = require("sequelize");
 const moment = require('moment');
 
 exports.getAllAsistances = async (req, res) => {
-    try {
-        const asistances = await Asistance.findAll();
-        res.status(200).json(asistances);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener asistencias", error: error.message });
-    }
+  try {
+    const asistances = await Asistance.findAll();
+    res.status(200).json(asistances);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener asistencias", error: error.message });
+  }
 };
 
 exports.getAsistanceById = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const asistance = await Asistance.findByPk(id);
-
-        if (!asistance) {
-            return res.status(404).json({ message: "Asistencia no encontrada" });
-        }
-
-        res.status(200).json(asistance);
-    } catch (error) {
-        res.status(500).json({ message: "Error al obtener asistencia", error: error.message });
-    }
-};
-
-exports.getInasistenciasByCourse = async (req, res) => {
   try {
-    const { id_course } = req.params;
-    const { status } = req.query;
-
-    const asistances = await Asistance.findAll({
-      where: { id_course, status },
-      include: [
-        { model: Student, attributes: ['firstName', 'lastName'] }
-      ]
-    });
-
-    res.status(200).json(asistances);
+    const { id } = req.params;
+    const asistance = await Asistance.findByPk(id);
+    if (!asistance) {
+      return res.status(404).json({ message: "Asistencia no encontrada" });
+    }
+    res.status(200).json(asistance);
   } catch (error) {
-    console.error("Error al obtener asistencias", error);
-    res.status(500).json({ message: "Error al obtener asistencias", error: error.message });
+    res.status(500).json({ message: "Error al obtener asistencia", error: error.message });
   }
 };
 
@@ -50,13 +29,12 @@ exports.createAsistance = async (req, res) => {
     const {
       id_student,
       id_professor,
-      id_course,
       status,
       justification,
-      news,
+      news
     } = req.body;
 
-    if (!id_student || !id_professor || !id_course || !status) {
+    if (!id_student || !id_professor || !status) {
       return res.status(400).json({ message: "Faltan campos requeridos" });
     }
 
@@ -65,14 +43,17 @@ exports.createAsistance = async (req, res) => {
       return res.status(400).json({ message: "Estado de asistencia no válido" });
     }
 
+    const student = await Student.findByPk(id_student);
+    if (!student) {
+      return res.status(404).json({ message: "Estudiante no encontrado" });
+    }
+
     const todayStart = moment().startOf("day").toDate();
     const todayEnd = moment().endOf("day").toDate();
 
-    // Verificar si ya existe asistencia registrada hoy para ese estudiante en ese curso
     const yaRegistrado = await Asistance.findOne({
       where: {
         id_student,
-        id_course,
         date: {
           [Op.between]: [todayStart, todayEnd],
         },
@@ -81,18 +62,17 @@ exports.createAsistance = async (req, res) => {
 
     if (yaRegistrado) {
       return res.status(409).json({
-        message: "Ya se registró asistencia para este estudiante hoy en este curso.",
+        message: "Ya se registró asistencia para este estudiante hoy.",
       });
     }
 
     const nuevaAsistencia = await Asistance.create({
       id_student,
-      id_professor: id_professor,
-      id_course,
+      id_professor,
       status,
       justification,
       news,
-      date: new Date(), // registramos la hora actual
+      date: new Date()
     });
 
     res.status(201).json({
@@ -106,92 +86,64 @@ exports.createAsistance = async (req, res) => {
 };
 
 exports.updateAsistance = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { id_student, id_professor, date, status, justification, news } = req.body;
+  try {
+    const { id } = req.params;
+    const { id_student, id_professor, status, justification, news } = req.body;
 
-        const asistance = await Asistance.findByPk(id);
-        if (!asistance) {
-            return res.status(404).json({ message: "Asistencia no encontrada" });
-        }
-
-        await asistance.update({
-            id_student,
-            id_professor,
-            status,
-            justification,
-            news
-        });
-
-        const validStatuses = ['present', 'absent', 'late'];
-        if (!validStatuses.includes(status)) {
-            return res.status(400).json({ message: "Estado de asistencia no válido" });
-        }
-
-        res.status(200).json({ message: "Asistencia actualizada exitosamente", asistance });
-    } catch (error) {
-        res.status(500).json({ message: "Error al actualizar asistencia", error: error.message });
+    const asistance = await Asistance.findByPk(id);
+    if (!asistance) {
+      return res.status(404).json({ message: "Asistencia no encontrada" });
     }
+
+    const validStatuses = ['present', 'absent', 'late'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: "Estado de asistencia no válido" });
+    }
+
+    await asistance.update({
+      id_student,
+      id_professor,
+      status,
+      justification,
+      news
+    });
+
+    res.status(200).json({ message: "Asistencia actualizada exitosamente", asistance });
+  } catch (error) {
+    res.status(500).json({ message: "Error al actualizar asistencia", error: error.message });
+  }
 };
 
 exports.deleteAsistance = async (req, res) => {
-    try {
-        const { id } = req.params;
-        const asistance = await Asistance.findByPk(id);
+  try {
+    const { id } = req.params;
+    const asistance = await Asistance.findByPk(id);
 
-        if (!asistance) {
-            return res.status(404).json({ message: "Asistencia no encontrada" });
-        }
-
-        await asistance.destroy();
-        res.status(200).json({ message: "Asistencia eliminada exitosamente" });
-    } catch (error) {
-        res.status(500).json({ message: "Error al eliminar asistencia", error: error.message });
+    if (!asistance) {
+      return res.status(404).json({ message: "Asistencia no encontrada" });
     }
-};
 
-exports.getAsistancesByCourseAndStatus = async (req, res) => {
-    try {
-        const courseId = req.params.courseId;
-        const status = req.query.status;
-
-        const asistances = await Asistance.findAll({
-            where: {
-                id_course: courseId,
-                status: status
-            },
-            include: [
-                {
-                    model: Student,
-                    attributes: ['id_student', 'firstName', 'lastName']
-                }
-            ]
-        });
-
-        res.status(200).json(asistances);
-    } catch (error) {
-        console.error("Error al obtener asistencias:", error);
-        res.status(500).json({
-            message: "Error al obtener asistencias",
-            error: error.message
-        });
-    }
+    await asistance.destroy();
+    res.status(200).json({ message: "Asistencia eliminada exitosamente" });
+  } catch (error) {
+    res.status(500).json({ message: "Error al eliminar asistencia", error: error.message });
+  }
 };
 
 exports.getInasistenciasByProfessorCourse = async (req, res) => {
   try {
     const { id_professor, id_course } = req.params;
 
+    const estudiantesCurso = await Student.findAll({ where: { id_course } });
+    const idsEstudiantes = estudiantesCurso.map(e => e.id_student);
+
     const asistencias = await Asistance.findAll({
       where: {
-        id_professor: id_professor,
-        id_course: id_course,
+        id_professor,
+        id_student: { [Op.in]: idsEstudiantes },
         status: 'absent'
       },
-      include: [{
-        model: Student,
-        foreignKey: 'id_student'
-      }],
+      include: [{ model: Student }],
       order: [['date', 'DESC']]
     });
 
@@ -206,18 +158,16 @@ exports.getAtrazosByProfessorCourse = async (req, res) => {
   try {
     const { id_professor, id_course } = req.params;
 
+    const estudiantesCurso = await Student.findAll({ where: { id_course } });
+    const idsEstudiantes = estudiantesCurso.map(e => e.id_student);
+
     const atrasos = await Asistance.findAll({
       where: {
-        id_professor: id_professor,
-        id_course: id_course,
+        id_professor,
+        id_student: { [Op.in]: idsEstudiantes },
         status: 'late'
       },
-      include: [
-        {
-          model: Student,
-          foreignKey: 'id_student'
-        }
-      ],
+      include: [{ model: Student }],
       order: [['date', 'DESC']]
     });
 
@@ -230,28 +180,53 @@ exports.getAtrazosByProfessorCourse = async (req, res) => {
 
 exports.checkAsistenciaDiaria = async (req, res) => {
   try {
-    const { id_course, id_professor } = req.params;
+    const { id_professor, id_course } = req.params;
+
+    const estudiantesCurso = await Student.findAll({ where: { id_course } });
+    const idsEstudiantes = estudiantesCurso.map(e => e.id_student);
 
     const startOfDay = moment().startOf('day').toDate();
     const endOfDay = moment().endOf('day').toDate();
 
     const asistencia = await Asistance.findOne({
       where: {
-        id_course,
         id_professor,
+        id_student: { [Op.in]: idsEstudiantes },
         date: {
           [Op.between]: [startOfDay, endOfDay]
         }
       }
     });
 
-    if (asistencia) {
-      return res.json(true);
-    } else {
-      return res.json(false);
-    }
+    res.json(!!asistencia);
   } catch (error) {
     console.error("Error al verificar asistencia diaria:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    res.status(500).json({ message: "Error interno del servidor", error: error.message });
+  }
+};
+
+exports.getAsistancesByCourseAndStatus = async (req, res) => {
+  try {
+    const courseId = req.params.courseId;
+    const status = req.query.status;
+
+    const estudiantesCurso = await Student.findAll({ where: { id_course: courseId } });
+    const idsEstudiantes = estudiantesCurso.map(e => e.id_student);
+
+    const asistances = await Asistance.findAll({
+      where: {
+        id_student: { [Op.in]: idsEstudiantes },
+        status
+      },
+      include: [{ model: Student }]
+    });
+
+    res.status(200).json(asistances);
+  } catch (error) {
+    console.error("Error al obtener asistencias:", error);
+    res.status(500).json({
+      message: "Error al obtener asistencias",
+      error: error.message
+    });
   }
 };
