@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const { Professor, User } = require('../model/tableRelations');
+const { Professor, User, ProfessorCourse } = require('../model/tableRelations');
 const { sendCredentialsEmail } = require('../services/emailService');
 
 exports.getAllProfessors = async (req, res) => {
@@ -41,7 +41,7 @@ exports.getProfessorById = async (req, res) => {
 
 exports.createProfessor = async (req, res) => {
   try {
-    const { firstName, lastName, identification, email, phone } = req.body;
+    const { firstName, lastName, identification, email, phone, courseIds } = req.body;
 
     // 1. Crear al profesor
     const newProfessor = await Professor.create({
@@ -66,6 +66,15 @@ exports.createProfessor = async (req, res) => {
 
     // 4. Relacionar el User con el Professor (Actualizar el id_user en el profesor)
     await newProfessor.update({ id_user: newUser.id_user });
+
+    // 4.1 Asignar cursos si se proporcionan
+    if (Array.isArray(courseIds)) {
+      const assignments = courseIds.map(id_course => ({
+        id_professor: newProfessor.id_professor,
+        id_course
+      }));
+      await ProfessorCourse.bulkCreate(assignments);
+    }
 
     // 5. Enviar correo con credenciales
     await sendCredentialsEmail(
