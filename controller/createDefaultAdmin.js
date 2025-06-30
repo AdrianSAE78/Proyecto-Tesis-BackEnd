@@ -3,7 +3,7 @@ const { User, Role, Administrative } = require('../model/tableRelations');
 
 async function createDefaultAdmin() {
   try {
-    // 1. Crear los roles si no existen (usando bulkCreate)
+    // 1. Crear roles si no existen
     await Role.bulkCreate([
       { id_role: 1, role_name: 'administrative' },
       { id_role: 2, role_name: 'professor' },
@@ -11,29 +11,28 @@ async function createDefaultAdmin() {
     ], { ignoreDuplicates: true });
     console.log('✅ Roles creados o ya existentes');
 
-    // 2. Verificar si ya existe el usuario admin
+    // 2. Verificar si el admin ya existe
     const existingAdmin = await User.findOne({ where: { user_name: 'admin' } });
     if (existingAdmin) return console.log('✅ Admin ya existe. No se creó nuevamente.');
 
-    // 3. Crear entidad administrativa
-    const administrative = await Administrative.create({
-      firstName: 'Super',
-      lastName: 'Admin',
-      identification: '1726727546',
-      email: 'admin@colegio.com',
-      phone: '0999999999'
-    });
-
-    // 4. Crear usuario admin con id_role = 1 directamente
-    const hashedPassword = await bcrypt.hash('12345678', 10);
+    // 3. Crear usuario primero
+    const plainPassword = '1726727546';
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
     const newUser = await User.create({
       user_name: 'admin',
       password: hashedPassword,
       id_role: 1,
     });
 
-    // 5. Asociar el usuario con el administrativo
-    await administrative.update({ id_user: newUser.id_user });
+    // 4. Luego crear el administrativo con el id_user recién generado
+    await Administrative.create({
+      firstName: 'Ariel',
+      lastName: 'Umatambo',
+      identification: plainPassword,
+      email: 'admin@colegio.com',
+      phone: '0998000597',
+      id_user: newUser.id_user, // 👈 aquí ya es seguro asociarlo
+    });
 
     console.log('🎉 Usuario admin creado exitosamente');
   } catch (error) {

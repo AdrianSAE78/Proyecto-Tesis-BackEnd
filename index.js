@@ -46,7 +46,7 @@ app.use('/api/news', newsRoute);
 
 // -------------------- INICIO DEL SERVIDOR --------------------
 //sequelize.sync({ force: true }) --> Para eliminar todos los datos de mi DB
-sequelize.sync({ alter: true }).then(() => {
+sequelize.sync({ force: true }).then(() => {
     console.log('✅ Base de datos conectada!');
     createDefaultAdmin(); 
     app.listen(PORT, () => {
