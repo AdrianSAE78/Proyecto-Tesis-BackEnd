@@ -18,6 +18,7 @@ const professorCourseRoute = require('./routes/professorCourseRoute');
 const roleRoute = require('./routes/roleRoute');
 const authRoute = require('./routes/authRoute');
 const newsRoute = require('./routes/newsRoute');
+const guardRoute = require('./routes/guardRoute');
 const createDefaultAdmin = require('./controller/createDefaultAdmin');
 
 // -------------------- CONFIGURACIÓN --------------------
@@ -43,6 +44,7 @@ app.use('/api/incidents', incidentsRoute);
 app.use('/api', roleRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/news', newsRoute);
+app.use('/api/guards', guardRoute);
 
 // -------------------- INICIO DEL SERVIDOR --------------------
 //sequelize.sync({ force: true }) --> Para eliminar todos los datos de mi DB
