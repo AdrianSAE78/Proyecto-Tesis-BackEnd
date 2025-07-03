@@ -8,7 +8,7 @@ async function createDefaultAdmin() {
       { id_role: 1, role_name: 'administrative' },
       { id_role: 2, role_name: 'professor' },
       { id_role: 3, role_name: 'legal_representative' },
-      { id_role: 4, role_name: 'guard' } // 👈 Rol agregado
+      { id_role: 4, role_name: 'guard' } 
     ], { ignoreDuplicates: true });
     console.log('✅ Roles creados o ya existentes');
 
