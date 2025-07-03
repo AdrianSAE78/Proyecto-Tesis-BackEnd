@@ -3,7 +3,7 @@ const router = express.Router();
 const authenticateToken = require('../middleware/authMiddleware');
 const asistanceController = require('../controller/asistanceController');
 
-router.use(authenticateToken);
+//router.use(authenticateToken);
 
 // ✅ Ruta para verificar si ya se tomó asistencia hoy
 router.get('/check/:id_course/:id_professor', asistanceController.checkAsistenciaDiaria);
