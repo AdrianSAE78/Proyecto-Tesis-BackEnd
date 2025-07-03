@@ -48,7 +48,7 @@ app.use('/api/guards', guardRoute);
 
 // -------------------- INICIO DEL SERVIDOR --------------------
 //sequelize.sync({ force: true }) --> Para eliminar todos los datos de mi DB
-sequelize.sync({ force: true }).then(() => {
+sequelize.sync({ alter: true }).then(() => {
     console.log('✅ Base de datos conectada!');
     createDefaultAdmin(); 
     app.listen(PORT, () => {
