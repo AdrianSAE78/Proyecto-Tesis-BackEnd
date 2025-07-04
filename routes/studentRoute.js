@@ -3,14 +3,15 @@ const router = express.Router();
 
 const studentController = require('../controller/studentController');
 
-router.get('/students', studentController.getAllStudents);
+// CRUD principal
+router.post('/', studentController.createStudent);
+router.get('/', studentController.getAllStudents);
+router.get('/:id', studentController.getStudentById);
+router.put('/:id', studentController.updateStudent);
+router.delete('/:id', studentController.deleteStudent);
+
+// Consultas personalizadas
 router.get('/by_course/:courseId', studentController.getStudentsByCourseId);
-router.get('/students/:id', studentController.getStudentById);
-router.post('/students', studentController.createStudent);
-router.put('/students/:id', studentController.updateStudent);
-router.delete('/students/:id', studentController.deleteStudent);
 router.get('/search/:apellido/:id_professor', studentController.searchStudentsByLastNameAndProfessor);
-
-
 
 module.exports = router;
