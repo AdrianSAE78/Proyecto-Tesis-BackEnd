@@ -34,12 +34,10 @@ app.use(cors());                      // Habilita CORS para cualquier dominio
 // -------------------- RUTAS API --------------------
 // Rutas agrupadas bajo /api o subrutas específicas
 app.use('/api/professor-courses', professorCourseRoute);
-/*app.use('/api', studentRoute);*/
 app.use('/api/students', studentRoute);
 app.use('/api', administrativeRoute);
 app.use('/api/courses', courseRoute);
 app.use('/api/asistances', asistanceRoutes);
-//app.use('/api', professorRoute);
 app.use('/api/professors', professorRoute); 
 app.use('/api/legal-representatives', legalRepresentativeRoute);
 app.use('/api/incidents', incidentsRoute);
