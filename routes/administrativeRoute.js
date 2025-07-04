@@ -11,7 +11,4 @@ router.post('/administratives', administrativeController.createAdministrative);
 router.put('/administratives/:id', administrativeController.updateAdministrative);
 router.delete('/administratives/:id', administrativeController.deleteAdministrative);
 
-// ❗️Solo valida el token del QR, también usa el middleware por seguridad
-router.get('/administratives/qr-token/:token/validate', authenticateToken, administrativeController.validateQRToken);
-
 module.exports = router;

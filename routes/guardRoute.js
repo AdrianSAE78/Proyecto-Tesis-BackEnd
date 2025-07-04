@@ -10,5 +10,7 @@ router.get('/:id', guardController.getGuardById);
 router.post('/', guardController.createGuard);
 router.put('/:id', guardController.updateGuard);
 router.delete('/:id', guardController.deleteGuard);
+// ❗️Solo valida el token del QR, también usa el middleware por seguridad
+router.get('/qr-token/:token/validate', authenticateToken, guardController.validateQRToken);
 
 module.exports = router;
