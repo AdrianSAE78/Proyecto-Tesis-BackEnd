@@ -7,7 +7,8 @@ async function createDefaultAdmin() {
     await Role.bulkCreate([
       { id_role: 1, role_name: 'administrative' },
       { id_role: 2, role_name: 'professor' },
-      { id_role: 3, role_name: 'legal_representative' }
+      { id_role: 3, role_name: 'legal_representative' },
+      { id_role: 4, role_name: 'guard' } 
     ], { ignoreDuplicates: true });
     console.log('✅ Roles creados o ya existentes');
 
@@ -31,7 +32,7 @@ async function createDefaultAdmin() {
       identification: plainPassword,
       email: 'admin@colegio.com',
       phone: '0998000597',
-      id_user: newUser.id_user, // 👈 aquí ya es seguro asociarlo
+      id_user: newUser.id_user,
     });
 
     console.log('🎉 Usuario admin creado exitosamente');
