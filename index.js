@@ -5,6 +5,7 @@ const cors = require('cors');                       // Para permitir solicitudes
 const bodyParser = require('body-parser');          // Para leer datos en formato JSON
 const sequelize = require('./config/database');     // Conexión a la base de datos
 
+
 // -------------------- RUTAS --------------------
 const studentRoute = require('./routes/studentRoute');
 const administrativeRoute = require('./routes/administrativeRoute');
@@ -33,18 +34,18 @@ app.use(cors());                      // Habilita CORS para cualquier dominio
 // -------------------- RUTAS API --------------------
 // Rutas agrupadas bajo /api o subrutas específicas
 app.use('/api/professor-courses', professorCourseRoute);
-app.use('/api', studentRoute);
+app.use('/api/students', studentRoute);
 app.use('/api', administrativeRoute);
 app.use('/api/courses', courseRoute);
 app.use('/api/asistances', asistanceRoutes);
-app.use('/api', userRoutes);
-app.use('/api', professorRoute);
+app.use('/api/professors', professorRoute); 
 app.use('/api/legal-representatives', legalRepresentativeRoute);
 app.use('/api/incidents', incidentsRoute);
 app.use('/api', roleRoute);
 app.use('/api/auth', authRoute);
 app.use('/api/news', newsRoute);
 app.use('/api/guards', guardRoute);
+app.use('/api', userRoutes);
 
 // -------------------- INICIO DEL SERVIDOR --------------------
 //sequelize.sync({ force: true }) --> Para eliminar todos los datos de mi DB

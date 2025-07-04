@@ -117,6 +117,7 @@ exports.updateProfessor = async (req, res) => {
   }
 };
 
+
 exports.deleteProfessor = async (req, res) => {
   try {
     const professor = await Professor.findByPk(req.params.id);
@@ -128,6 +129,33 @@ exports.deleteProfessor = async (req, res) => {
     res.status(200).json({ message: 'Profesor eliminado correctamente' });
   } catch (error) {
     console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
+exports.updateProfessorPhone = async (req, res) => {
+  try {
+    const professor = await Professor.findByPk(req.params.id);
+
+    if (!professor) {
+      return res.status(404).json({ error: 'Profesor no encontrado' });
+    }
+
+    const { phone } = req.body;
+
+    // Solo se permite actualizar el campo phone
+    if (typeof phone !== 'string' || phone.trim() === '') {
+      return res.status(400).json({ error: 'Número de teléfono inválido' });
+    }
+
+    await professor.update({ phone });
+
+    // No se actualiza el usuario ni otros campos
+    res.status(200).json(professor);
+  } catch (error) {
+    console.error("Error en updateProfessor:", error);
     res.status(500).json({ error: error.message });
   }
 };

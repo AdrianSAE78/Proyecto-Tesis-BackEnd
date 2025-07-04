@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
+const authenticateToken = require('../middleware/authMiddleware');
 
 const incidentController = require('../controller/incidentsController');
+
+//router.use(authenticateToken);
 
 router.get('/students/:id', incidentController.getIncidentsByStudentId);
 router.get('/students-follow/:id_professor', incidentController.getStudentsInFollowUpByProfessor);

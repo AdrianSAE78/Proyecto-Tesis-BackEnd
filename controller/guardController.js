@@ -51,8 +51,7 @@ exports.createGuard = async (req, res) => {
       lastName,
       identification,
       phone,
-      email,
-      address,
+      email
     });
 
     // 2. Preparar credenciales de usuario
@@ -110,8 +109,7 @@ exports.updateGuard = async (req, res) => {
       lastName,
       identification,
       phone,
-      email,
-      address,
+      email
     });
 
     // 6. Actualizar los datos del usuario asociado
