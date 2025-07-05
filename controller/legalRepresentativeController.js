@@ -10,7 +10,8 @@ const {
   Incident,
   Professor,
   LegalRepresentative,
-  User
+  User,
+  UsedQRToken
 } = require("../model/tableRelations");
 
 exports.getAllLegalRepresentatives = async (req, res) => {
@@ -209,6 +210,9 @@ exports.generateQR = async (req, res) => {
       process.env.SECRET_KEY,
       { expiresIn: "4h" }
     );
+
+    // Guardar el token en la base de datos
+    await UsedQRToken.create({ token });
 
     const url = `${process.env.FRONTEND_URL}/retirar-estudiante/${idEst}?token=${token}`;
     const qr = await QRCode.toDataURL(url);

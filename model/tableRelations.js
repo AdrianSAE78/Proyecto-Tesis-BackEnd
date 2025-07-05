@@ -11,6 +11,7 @@ const Student = require('./studentModel');
 const User = require('./userModel');
 const Role = require('./roleModel');
 const Guard = require('./guardModel');
+const UsedQRToken = require('./usedQrToken');
 
 // LegalRepresentative ↔ Student (1:N)
 LegalRepresentative.hasMany(Student, { foreignKey: 'id_legal_representative' });
@@ -93,5 +94,6 @@ module.exports = {
   User,
   ProfessorCourse,
   Role,
-  Guard
+  Guard,
+  UsedQRToken
 };

@@ -1,14 +1,10 @@
-const bcrypt = require('bcrypt');
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const QRCode = require("qrcode");
 
 const { sendCredentialsEmail } = require("../services/emailService");
 
-const {
-  Guard,
-  User,
-  Student
-} = require("../model/tableRelations");
+const { Guard, User, Student, Course, LegalRepresentative, UsedQRToken } = require("../model/tableRelations");
 
 exports.getAllGuards = async (req, res) => {
   try {
@@ -29,9 +25,7 @@ exports.getGuardById = async (req, res) => {
   try {
     const guard = await Guard.findByPk(req.params.id);
     if (!guard) {
-      return res
-        .status(404)
-        .json({ error: "guardia no encontrado" });
+      return res.status(404).json({ error: "guardia no encontrado" });
     }
     res.status(200).json(guard);
   } catch (error) {
@@ -51,11 +45,11 @@ exports.createGuard = async (req, res) => {
       lastName,
       identification,
       phone,
-      email
+      email,
     });
 
     // 2. Preparar credenciales de usuario
-    const userName = email.split('@')[0];
+    const userName = email.split("@")[0];
     const hashedPassword = await bcrypt.hash(identification, 10);
     const roleId = 4;
 
@@ -80,15 +74,14 @@ exports.createGuard = async (req, res) => {
     console.log("📤 Enviando al frontend:", {
       id_guard: newGuard.id_guard,
       guard: newGuard,
-      user: newUser
+      user: newUser,
     });
 
     res.status(201).json({
       id_guard: newGuard.id_guard,
       guard: newGuard,
-      user: newUser
+      user: newUser,
     });
-    
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -99,9 +92,7 @@ exports.updateGuard = async (req, res) => {
   try {
     const guard = await Guard.findByPk(req.params.id);
     if (!guard) {
-      return res
-        .status(404)
-        .json({ error: "Guardia no encontrado" });
+      return res.status(404).json({ error: "Guardia no encontrado" });
     }
     const { firstName, lastName, identification, phone, email } = req.body;
     await guard.update({
@@ -109,14 +100,14 @@ exports.updateGuard = async (req, res) => {
       lastName,
       identification,
       phone,
-      email
+      email,
     });
 
     // 6. Actualizar los datos del usuario asociado
     const user = await User.findByPk(guard.id_user);
     if (user) {
       await user.update({
-        user_name: email.split('@')[0], // Actualiza el nombre de usuario (por ejemplo, con el email)
+        user_name: email.split("@")[0], // Actualiza el nombre de usuario (por ejemplo, con el email)
         password: user.password, // Mantener la misma contraseña
       });
     }
@@ -132,14 +123,10 @@ exports.deleteGuard = async (req, res) => {
   try {
     const guard = await Guard.findByPk(req.params.id);
     if (!guard) {
-      return res
-        .status(404)
-        .json({ error: "Guardia no encontrado" });
+      return res.status(404).json({ error: "Guardia no encontrado" });
     }
     await guard.destroy();
-    res
-      .status(200)
-      .json({ message: "Guardia eliminado correctamente" });
+    res.status(200).json({ message: "Guardia eliminado correctamente" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error.message });
@@ -149,25 +136,43 @@ exports.deleteGuard = async (req, res) => {
 exports.validateQRToken = async (req, res) => {
   try {
     const { token } = req.params;
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const tokenRecord = await UsedQRToken.findOne({ where: { token } });
+
+    if (!tokenRecord) {
+      return res.status(401).json({ message: "Token no registrado" });
+    }
+
+    if (tokenRecord.used) {
+      return res.status(403).json({ message: "Este QR ya fue utilizado" });
+    }
+
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
 
     const estudiante = await Student.findOne({
       where: {
         id_student: decoded.idEst,
-        id_legal_representative: decoded.parentId
-      }
+        id_legal_representative: decoded.parentId,
+      },
+      include: [
+        { model: Course },
+        { model: LegalRepresentative },
+      ],
     });
 
     if (!estudiante) {
-      return res.status(404).json({ message: 'Estudiante no encontrado' });
+      return res.status(404).json({ message: "Estudiante no encontrado" });
     }
+
+    await tokenRecord.update({ used: true });
 
     return res.json({
       valid: true,
       student: estudiante,
-      parentId: decoded.parentId
+      parentId: decoded.parentId,
     });
   } catch (error) {
-    return res.status(401).json({ message: 'Token inválido o expirado' });
+    console.log("❌ Error al validar QR:", error);
+    return res.status(401).json({ message: "Token inválido o expirado" });
   }
 };
