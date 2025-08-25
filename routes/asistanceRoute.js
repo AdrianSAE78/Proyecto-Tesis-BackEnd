@@ -16,5 +16,7 @@ router.get('/professor/:id_professor/courses/:id_course/atrasos', asistanceContr
 router.post('/', asistanceController.createAsistance);
 router.put('/:id', asistanceController.updateAsistance);
 router.delete('/:id', asistanceController.deleteAsistance);
+router.get('/course/:courseId/statuses/hoy', asistanceController.getTodayAsistancesByCourse);
+
 
 module.exports = router;

@@ -230,3 +230,39 @@ exports.getAsistancesByCourseAndStatus = async (req, res) => {
     });
   }
 };
+
+exports.getTodayAsistancesByCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const { statuses } = req.query; 
+
+    if (!statuses) {
+      return res.status(400).json({ message: "Debes proporcionar al menos un status" });
+    }
+
+    const statusArray = statuses.split(',');
+
+    const estudiantesCurso = await Student.findAll({ where: { courseId } });
+    const idsEstudiantes = estudiantesCurso.map(e => e.id_student);
+
+    const hoyInicio = moment().startOf('day').toDate();
+    const hoyFin = moment().endOf('day').toDate();
+
+    const asistencias = await Asistance.findAll({
+      where: {
+        id_student: { [Op.in]: idsEstudiantes },
+        status: { [Op.in]: statusArray },
+        date: {
+          [Op.between]: [hoyInicio, hoyFin]
+        }
+      },
+      include: [{ model: Student }]
+    });
+
+    res.status(200).json(asistencias);
+  } catch (error) {
+    console.error("Error al obtener asistencias del día:", error);
+    res.status(500).json({ message: "Error al obtener asistencias del día", error: error.message });
+  }
+};
+
